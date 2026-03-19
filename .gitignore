@@ -1,0 +1,21 @@
+# Ambiente Virtual
+venv/
+.venv/
+env/
+
+# Banco de dados local 
+db.sqlite3
+
+# Arquivos compilados do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Variáveis de ambiente e senhas
+.env
+
+# Arquivos de mídia
+media/
+
+# Arquivos estáticos coletados em produção
+staticfiles/
