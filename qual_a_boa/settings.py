@@ -41,8 +41,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'rest_framework',
-    'corsheaders',
+    "rest_framework",
+    "corsheaders",
+    "baladas",
 ]
 
 MIDDLEWARE = [
@@ -80,12 +81,12 @@ WSGI_APPLICATION = "qual_a_boa.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("DB_NAME"),
-        "USER": os.environ.get("DB_USER"),
-        "PASSWORD": os.environ.get("DB_PASSWORD"),
-        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("DB_PORT", "3306"),
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "App-baladas",
+        "USER": "postgres",
+        "PASSWORD": "3291",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
 
