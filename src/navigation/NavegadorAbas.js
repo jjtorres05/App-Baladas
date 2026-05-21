@@ -14,7 +14,7 @@ export default function NavegadorAbas(){
     return (
         <Abas.Navigator screenOptions={({route})=>({
             headerShown: false,
-            tabBarStyles: {
+            tabBarStyle: {
                 backgroundColor: CORES.primaria,
                 borderTopWidth: 0,
                 height: 60,

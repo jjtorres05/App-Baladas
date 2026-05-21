@@ -6,7 +6,7 @@ import { CORES,TAMANHOS } from "../constants/tema";
 export default function TelaPerfil(){
     return(
         <SafeAreaView style={estilos.container}>
-            <Text style={estilos.avatar}>Perfil</Text>
+            <Text style={estilos.cabecalho}>Perfil</Text>
             <View style={estilos.avatarContainer}>
                 <View style={estilos.avatar}>
                     <Ionicons name="person" size={50} color={CORES.textoSecundario}/>
@@ -30,7 +30,7 @@ export default function TelaPerfil(){
             </View>
             <TouchableOpacity style={estilos.botaoSair}>
                 <Ionicons name="log-out" size={22} color={CORES.perigo}/>
-                <Text style={estilos.testoSair}>Sair da conta</Text>
+                <Text style={estilos.textoSair}>Sair da conta</Text>
             </TouchableOpacity>
         </SafeAreaView>
     );

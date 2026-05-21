@@ -1,4 +1,4 @@
-import React,{use, useState} from "react";
+import React,{useState} from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
@@ -12,7 +12,7 @@ export default function TelaFormAvaliacao({route, navigation}){
     const [fila,setFila]= useState(null);
     const [preco,setPreco]= useState(null);
     const [seguranca,setSeguranca]= useState(null);
-    const [pessoas,setPessoas]= useState(null);
+    const [pessoas,setPessoas]= useState(20);
     const [tempoEspera,setTempoEspera]= useState(null);
     const [comentario,setComentario]= useState(null);
 

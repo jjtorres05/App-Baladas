@@ -1,4 +1,4 @@
-import react from "react";
+import React from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
@@ -13,17 +13,17 @@ export default function TelaDetalheLocal({route, navigation}){
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/*cabecalho */}
                 <View style={estilos.cabecalho}>
-                    <TouchableOpacity onPress={()=> navigation.goback}>
+                    <TouchableOpacity onPress={()=> navigation.goBack()}>
                         <Ionicons name="arrow-back" size={24} color={CORES.texto}/>
                     </TouchableOpacity>
-                    <Text style={estilos.nomeLOcal}> {local.name}</Text>
+                    <Text style={estilos.nomeLocal}> {local.nome}</Text>
                     <View style={{width: 24}}/>
                 </View>
                 {/*Imagem */}
-                <Image source={{uri: local.image,}} style={estilos.imagemPrincipal}/>
+                <Image source={{uri: local.imagem}} style={estilos.imagemPrincipal}/>
                 {/*Curtidas e comentarios */}
                 <View style={estilos.barraInteracao}>
-                    <View style={estilos.itemIteracao}>
+                    <View style={estilos.itemInteracao}>
                         <Ionicons name="heart" size ={18} color={CORES.perigo}/>
                         <Text style={estilos.textoInteracao}> like</Text>
                     </View>

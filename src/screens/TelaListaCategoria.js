@@ -18,7 +18,7 @@ export default function TelaListaCategoria({route,navigation}){
                 <Text style={estilos.nomeLocal}>{item.nome}</Text>
                 <View style ={estilos.linha}>
                     <Ionicons name='star' size={12} color={CORES.secundaria}/>
-                    <Text style={estilos.avaliacao}> {item-avaliacao} </Text>
+                    <Text style={estilos.avaliacao}> {item.avaliacao} </Text>
                     <Text style={estilos.numAvaliacoes}>({item.numAvaliacoes} avaliacoes)</Text>
                 </View>
                 <Text style={estilos.vibe}>Vibe: {item.vibe}</Text>
