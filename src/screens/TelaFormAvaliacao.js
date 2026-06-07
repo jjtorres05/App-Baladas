@@ -1,8 +1,9 @@
 import React,{useState} from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
 import TagRapida from '../components/TagRapida';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function TelaFormAvaliacao({route, navigation}){
     const {local}= route.params;
@@ -15,11 +16,46 @@ export default function TelaFormAvaliacao({route, navigation}){
     const [pessoas,setPessoas]= useState(20);
     const [tempoEspera,setTempoEspera]= useState(null);
     const [comentario,setComentario]= useState(null);
+    const [imagemSelecionada, setImagemSelecionada]= useState(null);
 
-    const enviar=()=>{
+    const escolherImagem = async ()=> {
+        const resultado = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images','videos'],
+            allowsEditting: true,
+            quality: 0.8,
+        });
+        if(!resultado.canceled){
+            setImagemSelecionada(resultado.assets[0].uri);
+        }
+    };
+
+    const tirarFoto = async ()=> {
+        const permissao = await ImagePicker.requestCameraPermissionsAsync();
+        if(!permissao.granted){
+            Alert.alert('Permisao necessaria', 'Precisamos de acesso a camera');
+            return;
+        }
+        const resultado = await ImagePicker.launchCameraAsync({
+            allowsEditting: true,
+            quality: 0.8,
+        });
+        if(!resultado.canceled){
+            setImagemSelecionada(resultado.assets[0].uri);
+        }
+    };
+
+    const aoEscolherMedia = ()=>{
+        Alert.alert('Adicionar foto/video', 'Escolha uma opcao',[
+            {text: 'Camera',onPress: tirarFoto},
+            {text: 'Galeria', onPress: escolherImagem},
+            {text: 'Cancelar', style: 'cancel'},
+        ]);
+    };
+
+    const enviar = () => {
         Alert.alert('Status enviado!','Obrigado por compartilhar',[{
-            text: 'OK', onPress: ()=> navigation.goBack()
-        },]);
+            text: 'OK', onPress: () => navigation.goBack()
+        }]);
     };
 
     return(
@@ -128,9 +164,19 @@ export default function TelaFormAvaliacao({route, navigation}){
                 <Text style={estilos.pergunta}>
                     Adicionar foto/videos (opcional)
                 </Text>
-                <TouchableOpacity style={estilos.botaoUpload}>
+                <TouchableOpacity style={estilos.botaoUpload}onPress={aoEscolherMedia}>
+                    <Ionicons name="cloud-upload-outline"size={18}color={CORES.texto}/>
                     <Text style={estilos.textoUpload}>Subir arquivo</Text>
                 </TouchableOpacity>
+                {imagemSelecionada && (
+                    <View style={estilos.previewContainer}>
+                        <Image source={{uri: imagemSelecionada}}style={estilos.previewImagem}/>
+                        <TouchableOpacity style={estilos.botaoRemover}onPress={()=>setImagemSelecionada(null)}>
+                            <Ionicons name="close-circle"size={28}color={CORES.perigo}/>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
                 {/**Enviar */}
                 <TouchableOpacity style={estilos.botaoEnviar}onPress={enviar}>
                     <Text style={estilos.textoEnviar}>
@@ -184,8 +230,13 @@ const estilos = StyleSheet.create({
         borderRadius: TAMANHOS.raio,
         alignSelf: 'flex-start',
         marginBottom: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     textoUpload: { color: CORES.texto, fontSize: TAMANHOS.md, fontWeight: '600' },
+    previewContainer: { position: 'relative', marginBottom: 16 },
+    previewImagem: { width: '100%', height: 200, borderRadius: TAMANHOS.raio },
+    botaoRemover: { position: 'absolute', top: 8, right: 8 },
     botaoEnviar: {
         backgroundColor: CORES.secundaria,
         paddingVertical: 16,

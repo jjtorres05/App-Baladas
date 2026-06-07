@@ -1,4 +1,4 @@
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 import { View,Text,TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from "react-native";
 import { CORES,TAMANHOS } from "../constants/tema";
 
@@ -43,9 +43,13 @@ export default function TelaCadastro({navigation, aoEntrar}){
                     onChangeText={setSenha}
                     secureTextEntry
                 />
-                
+                {/*>Botao cadastrar */}
                 <TouchableOpacity style={estilos.botao} onPress={aoEntrar}>
-                    <Text style={estilos.textoLink}>Já tem conta? Entrar</Text>
+                    <Text style={estilos.textoBotao}>Criar Conta</Text>
+                </TouchableOpacity>
+                {/**Link para login */}
+                <TouchableOpacity onPress={()=>navigation.navigate('Login')}>
+                    <Text style={estilos.textoBotao}>Já tem conta? Entrar</Text>
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>

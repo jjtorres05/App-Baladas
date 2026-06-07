@@ -7,6 +7,12 @@ import NavegadorAbas from "./NavegadorAbas";
 import TelaListaCategoria from "../screens/TelaListaCategoria";
 import TelaDetalheLocal from "../screens/TelaDetalheLocal";
 import TelaFormAvaliacao from "../screens/TelaFormAvaliacao";
+import TelaProprietarioPainel from "../screens/TelaProprietarioPainel";
+import TelaCadastroEstabelecimento from "../screens/TelaCadastroEstabelecimento";
+import TelaPostarEvento from "../screens/TelaPostarEvento";
+import TelaMeusEstabelecimentos from "../screens/TelaMeusEstabelecimentos";
+import TelaGerenciarCardapio from "../screens/TelaGerenciarCardapio";
+
 
 const Pilha = createNativeStackNavigator();
 
@@ -28,10 +34,17 @@ export default function NavegadorPrincipal(){
                 headerShown: false,
                 contentStyle: {backgroundColor: CORES.fundo},
             }}>
-                <Pilha.Screen name="Abas" component={NavegadorAbas}/>
+                <Pilha.Screen name="Abas">
+                    {(props)=><NavegadorAbas{...props}aoSair={()=>setEstaLogado(false)}/>} 
+                </Pilha.Screen>
                 <Pilha.Screen name="ListaCategoria" component={TelaListaCategoria}/>
                 <Pilha.Screen name="DetalheLocal" component={TelaDetalheLocal}/>
                 <Pilha.Screen name="FormAvaliacao" component={TelaFormAvaliacao}/>
+                <Pilha.Screen name="ProprietarioPainel" component={TelaProprietarioPainel} />
+                <Pilha.Screen name="CadastrarEstabelecimento" component={TelaCadastroEstabelecimento} />
+                <Pilha.Screen name="PostarEvento" component={TelaPostarEvento} />
+                <Pilha.Screen name="MeusEstabelecimentos" component={TelaMeusEstabelecimentos} />
+                <Pilha.Screen name="GerenciarCardapio" component={TelaGerenciarCardapio} />
             </Pilha.Navigator>
         </NavigationContainer>
     );

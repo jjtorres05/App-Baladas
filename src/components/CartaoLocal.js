@@ -16,8 +16,8 @@ export default function CartaoLocal({local, aoPresionar, tamanho='medio'}){
             source={{uri: local.imagem}}
             style={[estilos.imagem, ehPequeno && estilos.imagemPequena]}
             />
-            <View style={[estilos.sobrepocisao]}>
-                <Text style={[estilos.nome, ehPequeno && estilos.nomePequenos]} numberOfLines={1}>
+            <View style={[estilos.sobreposicao]}>
+                <Text style={[estilos.nome, ehPequeno && estilos.nomePequeno]} numberOfLines={1}>
                     {local.nome}
                 </Text>
                 {!ehPequeno && (

@@ -1,9 +1,22 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
 
-export default function TelaPerfil(){
+export default function TelaPerfil({navigation, aoSair}){
+    const confirmarSaida= ()=>{
+        Alert.alert('Sair', 'Tem certeza que deseja sair?',[
+            {text: 'Cancelar', style: 'cancel'},
+            {
+                text: 'Sair',
+                style: 'destructive',
+                onPress: ()=> {
+                    if(aoSair) aoSair();
+                },
+            },
+        ]);
+    };
+
     return(
         <SafeAreaView style={estilos.container}>
             <Text style={estilos.cabecalho}>Perfil</Text>
@@ -19,16 +32,21 @@ export default function TelaPerfil(){
                     { icone: 'create', rotulo: 'Editar Perfil' },
                     { icone: 'bookmark', rotulo: 'Lugares Salvos' },
                     { icone: 'settings', rotulo: 'Configurações' },
-                    { icone: 'help-circle', rotulo: 'Ajuda' },
                 ].map((item,indice)=>(
-                    <TouchableOpacity key={indice} style={estilos.itemMenu}>
+                    <TouchableOpacity key={indice} style={estilos.itemMenu} onPress={()=>Alert.alert(item.rotulo, 'Disponivel na proxima versao com integracao do backend')}>
                         <Ionicons name={item.icone} size={22} color={CORES.primaria}/>
                         <Text style={estilos.textoMenu}>{item.rotulo}</Text>
                         <Ionicons name="chevron-forward" size={20} color={CORES.textoSecundario}/>
                     </TouchableOpacity>
                 ))}
             </View>
-            <TouchableOpacity style={estilos.botaoSair}>
+            {/*Botao Proprietario */}
+            <TouchableOpacity style={estilos.botaoProprietario} onPress={()=> navigation.getParent()?.navigate('ProprietarioPainel')}>
+                <Ionicons name="business" size={22} color={CORES.fundo}/>
+                <Text style={estilos.textoProprietario}>Sou Proprietário</Text>
+            </TouchableOpacity>
+            {/*Botao Sair */}
+            <TouchableOpacity style={estilos.botaoSair} onPress={confirmarSaida}>
                 <Ionicons name="log-out" size={22} color={CORES.perigo}/>
                 <Text style={estilos.textoSair}>Sair da conta</Text>
             </TouchableOpacity>
@@ -50,13 +68,21 @@ const estilos = StyleSheet.create({
     menu: { paddingHorizontal: TAMANHOS.espacamento },
     itemMenu: {
         flexDirection: 'row', alignItems: 'center',
-        paddingVertical: 16,
-        borderBottomWidth: 0.5, borderBottomColor: CORES.borda,
+        paddingVertical: 16, borderBottomWidth: 0.5, borderBottomColor: CORES.borda,
     },
     textoMenu: { flex: 1, color: CORES.texto, fontSize: TAMANHOS.lg, marginLeft: 12 },
+    botaoProprietario: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: CORES.secundaria,
+        marginHorizontal: TAMANHOS.espacamento,
+        marginTop: 24,
+        paddingVertical: 14,
+        borderRadius: TAMANHOS.raio,
+    },
+    textoProprietario: { color: CORES.fundo, fontSize: TAMANHOS.lg, fontWeight: 'bold', marginLeft: 8 },
     botaoSair: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-        marginTop: 30, paddingVertical: 16,
+        marginTop: 20, paddingVertical: 16,
     },
     textoSair: { color: CORES.perigo, fontSize: TAMANHOS.lg, fontWeight: '600', marginLeft: 8 },
 });

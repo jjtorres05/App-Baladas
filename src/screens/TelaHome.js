@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View,Text, ScrollView, TextInput, FlatList, StyleSheet, SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
@@ -6,7 +6,9 @@ import {LOCAIS } from '../data/dadosMock'
 import CartaoLocal from '../components/CartaoLocal'
 
 export default function TelaHome({navigation}){
-
+    const [busca, setBusca]= useState('');
+    const locaisFiltrados = busca.trim() ? LOCAIS.filter((l)=> l.nome.toLowerCase().includes(busca.toLowerCase())) : LOCAIS;
+    const irParaLocal = (item)=> navigation.navigate('DetalheLocal', {local: item});
     return(
         <SafeAreaView style={estilos.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -17,58 +19,78 @@ export default function TelaHome({navigation}){
                         style={estilos.entradaBusca}
                         placeholder="Procurar cidade ou localidade"
                         placeholderTextColor={CORES.textoMudo}
+                        value={busca}
+                        onChangeText={setBusca}
                     />
-
+                    {busca.length > 0 &&(
+                        <Ionicons name= "close-circle" size={20} color={CORES.textoMudo} onPress={()=> setBusca('')}/>
+                    )}
                 </View>
-
-                {/* Em Destaque */}
-                <Text style={estilos.tituloSecao}>Em destaque</Text>
-                <FlatList
-                    data={LOCAIS}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item)=> item.id}
-                    contentContainerStyle={estilos.listaPadding}
-                    renderItem={({item})=>(
-                        <CartaoLocal
-                        local={item}
-                        aoPresionar={()=> navigation.navigate('DetalheLocal',{local:item})}
+                {/*se esta procurand, mostra resultados */}
+                {busca.trim() ? (
+                    <View style={estilos.resultados}>
+                        <Text style= {estilos.tituloSecao}>Resultados para "{busca}"</Text>
+                        {locaisFiltrados.length > 0 ? (
+                            locaisFiltrados.map((item)=>(
+                                <CartaoLocal key={item.id} local={item} aoPresionar={()=>irParaLocal(item)}/>
+                            ))
+                        ): (
+                            <Text style={estilos.semResultados}>Nenhum local encontrado</Text>
+                        )}
+                    </View>
+                ) : (
+                    <>
+                        {/* Em Destaque */}
+                        <Text style={estilos.tituloSecao}>Em destaque</Text>
+                        <FlatList
+                            data={LOCAIS}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            keyExtractor={(item)=> item.id}
+                            contentContainerStyle={estilos.listaPadding}
+                            renderItem={({item})=>(
+                                <CartaoLocal
+                                local={item}
+                                aoPresionar={()=> navigation.navigate('DetalheLocal',{local:item})}
+                                />
+                            )}
                         />
-                    )}
-                />
 
-                {/* Baladas Perto */}
-                <Text style={estilos.tituloSecao}>Baladas perto</Text>
-                <FlatList
-                    data={LOCAIS.filter((l)=> l.categoria==='Club/Baladas')}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item)=> item.id}
-                    contentContainerStyle={estilos.listaPadding}
-                    renderItem={({item})=>(
-                        <CartaoLocal
-                            local={item}
-                            tamanho="pequeno"
-                            aoPresionar={()=> navigation.navigate('DetalheLocal',{local: item})}
+                        {/* Baladas Perto */}
+                        <Text style={estilos.tituloSecao}>Baladas perto</Text>
+                        <FlatList
+                            data={LOCAIS.filter((l)=> l.categoria==='Club/Baladas')}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            keyExtractor={(item)=> item.id}
+                            contentContainerStyle={estilos.listaPadding}
+                            renderItem={({item})=>(
+                                <CartaoLocal
+                                    local={item}
+                                    tamanho="pequeno"
+                                    aoPresionar={()=> navigation.navigate('DetalheLocal',{local: item})}
+                                />
+                            )}
                         />
-                    )}
-                />
 
-                {/* Top da Noite */}
-                <Text style={estilos.tituloSecao}>Top da noite</Text>
-                <FlatList
-                    data={LOCAIS}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item)=> item.id}
-                    contentContainerStyle={estilos.listaPadding}
-                    renderItem={({item})=>(
-                        <CartaoLocal
-                            local={item}
-                            aoPresionar={()=> navigation.navigate('DetalheLocal',{local:item})}
+                        {/* Top da Noite */}
+                        <Text style={estilos.tituloSecao}>Top da noite</Text>
+                        <FlatList
+                            data={LOCAIS}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            keyExtractor={(item)=> item.id}
+                            contentContainerStyle={estilos.listaPadding}
+                            renderItem={({item})=>(
+                                <CartaoLocal
+                                    local={item}
+                                    aoPresionar={()=> navigation.navigate('DetalheLocal',{local:item})}
+                                />
+                            )}
                         />
-                    )}
-                />
+                        
+                    </>
+                )}
                 <View style={{height:20}}/>
             </ScrollView>
         </SafeAreaView>
@@ -96,4 +118,6 @@ const estilos = StyleSheet.create({
         marginBottom: 12,
     },
     listaPadding: { paddingLeft: TAMANHOS.espacamento },
+    resultados: { paddingHorizontal: TAMANHOS.espacamento },
+    semResultados: { color: CORES.textoMudo, fontSize: TAMANHOS.md, textAlign: 'center', marginTop: 40 },
 });

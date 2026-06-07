@@ -22,7 +22,7 @@ export default function TelaListaCategoria({route,navigation}){
                     <Text style={estilos.numAvaliacoes}>({item.numAvaliacoes} avaliacoes)</Text>
                 </View>
                 <Text style={estilos.vibe}>Vibe: {item.vibe}</Text>
-                <Text style={estilos.endereco}>preco: {item.preco} · Fila: {item.fila} </Text>
+                <Text style={estilos.detalhe}>preco: {item.preco} · Fila: {item.fila} </Text>
             </View>
         </TouchableOpacity>
     );

@@ -10,7 +10,7 @@ import TelaPerfil from "../screens/TelaPerfil";
 
 const Abas = createBottomTabNavigator();
 
-export default function NavegadorAbas(){
+export default function NavegadorAbas({aoSair}){
     return (
         <Abas.Navigator screenOptions={({route})=>({
             headerShown: false,
@@ -38,7 +38,9 @@ export default function NavegadorAbas(){
             <Abas.Screen name="Explorar" component={TelaExplorar}/>
             <Abas.Screen name="Mapa" component={TelaMapa}/>
             <Abas.Screen name="Notificacoes" component={TelaNotificacoes}/>
-            <Abas.Screen name="Perfil" component={TelaPerfil}/>
+            <Abas.Screen name="Perfil"> 
+                {(props)=><TelaPerfil {...props}aoSair={aoSair}/>}
+            </Abas.Screen>
         </Abas.Navigator>
     );
 }

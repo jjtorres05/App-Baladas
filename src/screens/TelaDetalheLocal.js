@@ -27,7 +27,7 @@ export default function TelaDetalheLocal({route, navigation}){
                         <Ionicons name="heart" size ={18} color={CORES.perigo}/>
                         <Text style={estilos.textoInteracao}> like</Text>
                     </View>
-                    <View style={estilos.itemIteracao}>
+                    <View style={estilos.itemInteracao}>
                         <Ionicons name="chatbubble-outline" size={18} color={CORES.textoSecundario}/>
                         <Text style={estilos.textoInteracao}>{postLocal.length} comentarios</Text>
                     </View>
