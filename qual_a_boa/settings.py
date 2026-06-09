@@ -29,7 +29,7 @@ SECRET_KEY = "django-insecure-s40n73lpc##fde^!8a+r@_rr44=e=2t=iq1+y7xr(r#i$jx41v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -47,11 +47,6 @@ INSTALLED_APPS = [
     "baladas",
 ]
 
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
-}
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",

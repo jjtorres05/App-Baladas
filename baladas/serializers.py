@@ -21,7 +21,7 @@ from .models import (
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = "__all__"
+        exclude = ['senha']
 
 
 class ClienteSerializer(serializers.ModelSerializer):
