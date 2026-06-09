@@ -35,7 +35,7 @@ export default function NavegadorPrincipal(){
                 contentStyle: {backgroundColor: CORES.fundo},
             }}>
                 <Pilha.Screen name="Abas">
-                    {(props)=><NavegadorAbas{...props}aoSair={()=>setEstaLogado(false)}/>} 
+                    {(props)=><NavegadorAbas {...props} aoSair={()=>setEstaLogado(false)}/>} 
                 </Pilha.Screen>
                 <Pilha.Screen name="ListaCategoria" component={TelaListaCategoria}/>
                 <Pilha.Screen name="DetalheLocal" component={TelaDetalheLocal}/>

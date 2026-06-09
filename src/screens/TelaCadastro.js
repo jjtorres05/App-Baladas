@@ -5,6 +5,7 @@ import { CORES,TAMANHOS } from "../constants/tema";
 export default function TelaCadastro({navigation, aoEntrar}){
 
     const [nome,setNome]= useState('');
+    const [username,setUsername]= useState('');
     const [email,setEmail]= useState('');
     const [senha,setSenha]= useState('');
 
@@ -23,6 +24,15 @@ export default function TelaCadastro({navigation, aoEntrar}){
                     placeholderTextColor={CORES.textoMudo}
                     value={nome}
                     onChangeText={setNome}
+                />
+
+                <TextInput
+                    style={estilos.entrada}
+                    placeholder="Nome de usuário"
+                    placeholderTextColor={CORES.textoMudo}
+                    value={username}
+                    onChangeText={setUsername}
+                    autoCapitalize="none"
                 />
 
                 <TextInput
@@ -49,7 +59,7 @@ export default function TelaCadastro({navigation, aoEntrar}){
                 </TouchableOpacity>
                 {/**Link para login */}
                 <TouchableOpacity onPress={()=>navigation.navigate('Login')}>
-                    <Text style={estilos.textoBotao}>Já tem conta? Entrar</Text>
+                    <Text style={estilos.textoLink}>Já tem conta? Entrar</Text>
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>

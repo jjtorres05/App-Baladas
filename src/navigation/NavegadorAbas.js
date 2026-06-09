@@ -5,7 +5,7 @@ import { CORES } from "../constants/tema";
 import TelaHome from "../screens/TelaHome";
 import TelaExplorar from "../screens/TelaExplorar";
 import TelaMapa from "../screens/TelaMapa";
-import TelaNotificacoes from "../screens/TelaNotificacoes";
+import TelaFavoritos from "../screens/TelaFavoritos";
 import TelaPerfil from "../screens/TelaPerfil";
 
 const Abas = createBottomTabNavigator();
@@ -29,7 +29,7 @@ export default function NavegadorAbas({aoSair}){
                 if (route.name==='Home') nomeIcone= 'home';
                 else if (route.name==='Explorar')nomeIcone='compass';
                 else if (route.name==='Mapa')nomeIcone='map';
-                else if (route.name==='Notificacoes')nomeIcone='notifications';
+                else if (route.name==='Favoritos')nomeIcone='bookmark';
                 else if (route.name==='Perfil')nomeIcone='person';
                 return <Ionicons name={nomeIcone} size={size} color={color}/>;
             },
@@ -37,7 +37,7 @@ export default function NavegadorAbas({aoSair}){
             <Abas.Screen name="Home" component={TelaHome}/>
             <Abas.Screen name="Explorar" component={TelaExplorar}/>
             <Abas.Screen name="Mapa" component={TelaMapa}/>
-            <Abas.Screen name="Notificacoes" component={TelaNotificacoes}/>
+            <Abas.Screen name="Favoritos" component={TelaFavoritos}/>
             <Abas.Screen name="Perfil"> 
                 {(props)=><TelaPerfil {...props}aoSair={aoSair}/>}
             </Abas.Screen>

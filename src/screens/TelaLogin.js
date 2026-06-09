@@ -47,7 +47,7 @@ export default function TelaLogin({navigation,aoEntrar}){
 
                 <TouchableOpacity onPress={()=>navigation.navigate('Cadastro')}>
                     <Text style={estilos.textoLink}>
-                        Nao tem conta? Crie uma contra
+                        Não tem conta? Crie uma conta
                     </Text>
                 </TouchableOpacity>
             </View>
