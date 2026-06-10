@@ -5,13 +5,34 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CORES, TAMANHOS } from '../constants/tema';
 import { POSTS_STATUS } from '../data/dadosMock';
 import PostStatus from '../components/PostStatus';
+import { postagensDoLocal } from '../services/api';
 
 export default function TelaDetalheLocal({ route, navigation }) {
     const { local } = route.params;
     const [ehFavorito, setEhFavorito] = useState(false);
 
     // Posts desse local (mock por enquanto, depois vem da API)
-    const postLocal = POSTS_STATUS.filter((p) => p.localId === (local.id_estabelecimento || local.id));
+    const [postLocal, setPostLocal]= useState([]);
+
+    useEffect(()=>{
+        carregarPosts();
+    },[]);
+    const carregarPosts = async() => {
+        try {
+            const idLocal= local.id_estabelecimento || local.id;
+            const dados = await postagensDoLocal(idLocal);
+            if(dados && dados.length > 0){
+                setPostLocal(dados);
+            }else{
+                //Api respondeu mas nao tem posts usa mock
+                const mock= POSTS_STATUS.filter((p)=>p.localId===idLocal);
+                setPostLocal(mock);
+            }
+        }catch(erro){//Api nao respondeu
+            const mock = POSTS_STATUS.filter((p)=> p.localId===(local.id_estabelecimento || local.id));
+            setPostLocal(mock);
+        }
+    };
 
     // Verifica se já é favorito ao abrir a tela
     useEffect(() => {

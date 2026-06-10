@@ -1,13 +1,38 @@
-import React from "react";
-import { View,Text,FlatList,TouchableOpacity,Image,SafeAreaView,StyleSheet } from "react-native";
+import React,{useEffect, useState} from "react";
+import { View,Text,FlatList,TouchableOpacity,Image,SafeAreaView,StyleSheet, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
 import { LOCAIS } from "../data/dadosMock";
-export default function TelaListaCategoria({route,navigation}){
-    const {categoria} = route.params;
-    const filtrados= LOCAIS.filter((l)=> l.categoria === categoria.nome);
-    const locais = filtrados.length > 0 ? filtrados : LOCAIS;
+import { listarEstabelecimentos } from "../services/api";
 
+export default function TelaListaCategoria({route,navigation}){
+    const [locais, setLocais]= useState([]);
+    const [carregando, setCarregando]= useState(true);
+    const {categoria} = route.params;
+    useEffect(()=>{
+        carregarLocais();
+    },[]);
+    const carregarLocais= async()=>{
+        try{
+            const dados= await listarEstabelecimentos({
+                categoria: categoria.nome
+            });
+            if(dados && dados.length > 0){
+                setLocais(dados);
+            }else{
+                usarMock();
+            }
+        }catch (erro){
+            console.log('Usando mock');
+            usarMock();
+        }
+        setCarregando(false);
+    };
+    const usarMock= ()=>{
+        const filtrados= LOCAIS.filter((l)=> l.categoria === categoria.nome);
+        setLocais(filtrados.length > 0 ? filtrados : LOCAIS);
+    };
+    
     const renderLocal = ({item})=> (
         <TouchableOpacity
         style={estilos.itemLocal}
@@ -47,13 +72,19 @@ export default function TelaListaCategoria({route,navigation}){
                 </TouchableOpacity>
             </View>
             {/*lista */}
-            <FlatList 
+            {carregando ?(
+                <View style={{flex: 1, justifyContent: 'center', alignItems:'center'}}>
+                    <ActivityIndicator size="large" color={CORES.primaria}/>
+                </View>
+            ):(
+                <FlatList
                 data={locais}
-                keyExtractor={(item)=> item.id}
+                keyExtractor={(item)=> String(item.id_estabelecimento || item.id)}
                 renderItem={renderLocal}
                 contentContainerStyle={estilos.lista}
                 showsVerticalScrollIndicator={false}
-            />
+                />
+            )}
         </SafeAreaView>
     );
 }

@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES, TAMANHOS } from "../constants/tema";
+import { meusEstabelecimentos, adicionarProduto as adicionarProdutoAPI, listarProdutos } from "../services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MEUS_LOCAIS = [
     { id: '1', nome: '2800 Music Club' },
@@ -17,18 +19,58 @@ export default function TelaGerenciarCardapio({ navigation }) {
         { id: '1', nome: 'Caipirinha', preco: '18.00', descricao: 'Limão, cachaça e açúcar' },
         { id: '2', nome: 'Cerveja Artesanal', preco: '22.00', descricao: 'IPA local 600ml' },
     ]);
+    const [meusLocais, setMeusLocais]= useState(MEUS_LOCAIS);
 
-    const adicionarProduto = () => {
-        if (!nome || !preco) {
-            Alert.alert('Preencha nome e preço');
+    useEffect(()=> {
+        carregarLocais();
+    },[]);
+    const carregarLocais= async ()=>{
+        try{
+            const idUsuario = await AsyncStorage.getItem('idUsuario');
+            const dados = await meusEstabelecimentos(idUsuario);
+            if( dados && dados.length > 0){
+                setMeusLocais(dados);
+            }
+        }catch (erro){
+                console.log('Usando locais mock');
+        }
+    }
+
+    //Seleciona local e carga seus produtos
+    const aoSelecionarLocal = async (local) => {
+        setLocalSelecionado(local);
+        try{
+            const idLocal= local.id_estabelecimento || local.id;
+            const dados = await listarProdutos(idLocal);
+            setProdutos(dados || []);
+        }catch (erro){
+            console.log('Erro ao carregar produtos');
+        }
+    };
+
+    const adicionarProduto = async () => {
+        if(!nome || !preco){
+            Alert.alert('Preencha nome e preco');
             return;
         }
-        const novo = { id: String(Date.now()), nome, preco, descricao };
-        setProdutos([...produtos, novo]);
-        setNome('');
-        setPreco('');
-        setDescricao('');
-        Alert.alert('Produto adicionado!');
+        try{
+            const idLocal = localSelecionado.id_estabelecimento || localSelecionado.id;
+            await adicionarProdutoAPI({
+                id_estabelecimento: idLocal,
+                nome,
+                preco: parseFloat(preco),
+                descricao,
+            });
+            //recarrega lista
+            const dados = await listarProdutos(idLocal);
+            setProdutos(dados || []);
+            setNome('');
+            setPreco('');
+            setDescricao('');
+            Alert.alert('Produto adicionado');
+        }catch (erro){
+            Alert.alert('Erro',erro.message);
+        }
     };
 
     return (
@@ -45,14 +87,14 @@ export default function TelaGerenciarCardapio({ navigation }) {
                 {/* Selecionar local */}
                 <Text style={estilos.secaoTitulo}>Selecione o estabelecimento</Text>
                 <View style={estilos.listaLocais}>
-                    {MEUS_LOCAIS.map((local) => (
+                    {meusLocais.map((local) => (
                         <TouchableOpacity
-                            key={local.id}
-                            style={[estilos.botaoLocal, localSelecionado?.id === local.id && estilos.botaoLocalSelecionado]}
-                            onPress={() => setLocalSelecionado(local)}
+                            key={local.id_estabelecimento || local.id}
+                            style={[estilos.botaoLocal, (localSelecionado?.id_estabelecimento || localSelecionado?.id) === (local.id_estabelecimento || local.id) && estilos.botaoLocalSelecionado]}
+                            onPress={() => aoSelecionarLocal(local)}
                         >
-                            <Ionicons name="business" size={18} color={localSelecionado?.id === local.id ? CORES.fundo : CORES.primaria} />
-                            <Text style={[estilos.textoLocal, localSelecionado?.id === local.id && estilos.textoLocalSelecionado]}>
+                            <Ionicons name="business" size={18} color={(localSelecionado?.id_estabelecimento || localSelecionado?.id) === (local.id_estabelecimento || local.id) ? CORES.fundo : CORES.primaria} />
+                            <Text style={[estilos.textoLocal, (localSelecionado?.id_estabelecimento || localSelecionado?.id) === (local.id_estabelecimento || local.id) && estilos.textoLocalSelecionado]}>
                                 {local.nome}
                             </Text>
                         </TouchableOpacity>

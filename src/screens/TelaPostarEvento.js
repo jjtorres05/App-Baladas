@@ -1,8 +1,10 @@
-import React, {useState} from "react";
-import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert } from "react-native";
+import React, {useState, useEffect} from "react";
+import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
 import { CORES, TAMANHOS } from "../constants/tema";
+import { meusEstabelecimentos, postagemEvento, uploadImagem } from "../services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MEUS_LOCAIS = [
     { id: '1', nome: '2800 Music Club' },
@@ -16,6 +18,25 @@ export default function TelaPostarEvento({navigation}){
     const [promocao, setPromocao] = useState('');
     const [data, setData] = useState('');
     const [imagem, setImagem] = useState(null);
+    const [carregando, setCarregando]= useState(false);
+    const [meusLocais, setMeusLocais]= useState(MEUS_LOCAIS);
+
+    useEffect(()=>{
+        carregarLocais();
+    },[]);
+
+    const carregarLocais= async()=>{
+        try{
+            const idUsuario = await AsyncStorage.getItem('idUsuario');
+            const dados = await meusEstabelecimentos(idUsuario);
+            if(dados && dados.length > 0){
+                setMeusLocais(dados);
+            }
+        }catch(erro){
+            console.log('Usando locais mock');
+        }
+    };
+
 
     const escolherImagem = async () => {
         const resultado = await ImagePicker.launchImageLibraryAsync({
@@ -51,7 +72,7 @@ export default function TelaPostarEvento({navigation}){
         ]);
     };
 
-    const publicar = () => {
+    const publicar = async () => {
         if (!localSelecionado) {
             Alert.alert('Selecione um local', 'Escolha o estabelecimento do evento');
             return;
@@ -60,9 +81,28 @@ export default function TelaPostarEvento({navigation}){
             Alert.alert('Campos obrigatorios', 'Preencha pelo menos titulo e descricao');
             return;
         }
-        Alert.alert('Evento Publicado!', `"${titulo}" foi publicado em ${localSelecionado.nome}`, [
-            { text: 'OK', onPress: () => navigation.goBack() }
-        ]);
+        setCarregando(true);
+        try{
+            let urlImagem = null;
+            if(imagem){
+                urlImagem= await uploadImagem(imagem);
+            }
+            const idLocal= localSelecionado.id_estabelecimento || localSelecionado.id;
+            await postagemEvento({
+                id_estabelecimento: idLocal,
+                titulo,
+                descricao,
+                promocao,
+                data_evento: data,
+                imagem: urlImagem,
+            });
+            Alert.alert('Evento Publicado!', `"${titulo}" foi publicado em ${localSelecionado.nome}`, [
+                { text: 'OK', onPress: () => navigation.goBack() }
+            ]);
+        }catch (erro){
+            Alert.alert('Erro', erro.message || 'Nao foi possivel publicar');
+        }
+        setCarregando(false);
     };
 
     return (
@@ -80,18 +120,22 @@ export default function TelaPostarEvento({navigation}){
                 {/*Selecionar local */}
                 <Text style={estilos.rotulo}>Selecione o estabelecimento</Text>
                 <View style={estilos.listaLocais}>
-                    {MEUS_LOCAIS.map((local) => (
-                        <TouchableOpacity
-                            key={local.id}
-                            style={[estilos.botaoLocal, localSelecionado?.id === local.id && estilos.botaoLocalSelecionado]}
-                            onPress={() => setLocalSelecionado(local)}
-                        >
-                            <Ionicons name="business" size={18} color={localSelecionado?.id === local.id ? CORES.fundo : CORES.primaria} />
-                            <Text style={[estilos.textoLocal, localSelecionado?.id === local.id && estilos.textoLocalSelecionado]}>
-                                {local.nome}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
+                    {meusLocais.map((local) => {
+                        const idLocal = local.id_estabelecimento || local.id;
+                        const selecionado = (localSelecionado?.id_estabelecimento || localSelecionado?.id) === idLocal;
+                        return (
+                            <TouchableOpacity
+                                key={idLocal}
+                                style={[estilos.botaoLocal, selecionado && estilos.botaoLocalSelecionado]}
+                                onPress={() => setLocalSelecionado(local)}
+                            >
+                                <Ionicons name="business" size={18} color={selecionado ? CORES.fundo : CORES.primaria} />
+                                <Text style={[estilos.textoLocal, selecionado && estilos.textoLocalSelecionado]}>
+                                    {local.nome}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
                 </View>
 
                 {localSelecionado ? (
@@ -128,8 +172,10 @@ export default function TelaPostarEvento({navigation}){
                         )}
 
                         {/*Publicar */}
-                        <TouchableOpacity style={estilos.botaoPublicar} onPress={publicar}>
-                            <Text style={estilos.textoPublicar}>Publicar evento</Text>
+                        <TouchableOpacity style={[estilos.botaoPublicar, carregando &&{opacity:0.6}]} onPress={publicar} disabled={carregando}>
+                            {carregando ? (<ActivityIndicator color={CORES.fundo}/>):(
+                                <Text style={estilos.textoPublicar}>Publicar evento</Text>
+                            )}
                         </TouchableOpacity>
                     </>
                 ) : (

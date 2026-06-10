@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React,{useState, useEffect} from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { CORES } from "../constants/tema";
@@ -12,12 +12,26 @@ import TelaCadastroEstabelecimento from "../screens/TelaCadastroEstabelecimento"
 import TelaPostarEvento from "../screens/TelaPostarEvento";
 import TelaMeusEstabelecimentos from "../screens/TelaMeusEstabelecimentos";
 import TelaGerenciarCardapio from "../screens/TelaGerenciarCardapio";
+import { getUsuarioLogado } from "../services/api";
 
 
 const Pilha = createNativeStackNavigator();
 
 export default function NavegadorPrincipal(){
     const [estaLogado, setEstaLogado]= useState(false);
+    const [verificando, setVerificando]= useState(true);
+    //Ao abrir a app, verifica se tem um token salvo para accessar diretamente
+    useEffect(()=>{
+        const verificar = async () => {
+            const usuario = await getUsuarioLogado();
+            if(usuario) setEstaLogado(true);
+            setVerificando(false);
+        };
+        verificar();
+    },[]);
+
+    //tela em branco enquanto verifica
+    if(verificando) return null;
 
     if(!estaLogado){
         return (

@@ -11,7 +11,7 @@ export default function PilhaAutenticacao({aoEntrar}){
         <Pilha.Navigator screenOptions={{headerShown: false}}>
             <Pilha.Screen name="Inicial" component={TelaInicial}/>
             <Pilha.Screen name="Login">
-                {(props)=> <TelaLogin{...props}aoEntrar={aoEntrar}/>}
+                {(props)=> <TelaLogin {...props}aoEntrar={aoEntrar}/>}
             </Pilha.Screen>
             <Pilha.Screen name="Cadastro">
                 {(props)=> <TelaCadastro {...props} aoEntrar={aoEntrar}/>}

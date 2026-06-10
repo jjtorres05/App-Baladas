@@ -1,16 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
+import { logout, getUsuarioLogado } from "../services/api";
 
 export default function TelaPerfil({navigation, aoSair}){
+    const [usuario, setUsuario] = useState(null);
+    useEffect(()=>{
+        carregarUsuario();
+    },[]);
+    
+    const carregarUsuario= async () => {
+        const dados = await getUsuarioLogado();
+        if (dados) setUsuario(dados);
+    }
+
     const confirmarSaida= ()=>{
         Alert.alert('Sair', 'Tem certeza que deseja sair?',[
             {text: 'Cancelar', style: 'cancel'},
             {
                 text: 'Sair',
                 style: 'destructive',
-                onPress: ()=> {
+                onPress: async ()=> {
+                    await logout();
                     if(aoSair) aoSair();
                 },
             },
@@ -24,16 +36,16 @@ export default function TelaPerfil({navigation, aoSair}){
                 <View style={estilos.avatar}>
                     <Ionicons name="person" size={50} color={CORES.textoSecundario}/>
                 </View>
-                <Text style={estilos.nome}>Usuarios</Text>
-                <Text style={estilos.email}>Usuario@email.com</Text>
+                <Text style={estilos.nome}>{usuario?.username || 'Usuario'}</Text>
+                <Text style={estilos.email}>ID: {usuario?.idUsuario || '-'}</Text>
             </View>
             <View style={estilos.menu}>
                 {[
                     { icone: 'create', rotulo: 'Editar Perfil' },
-                    { icone: 'bookmark', rotulo: 'Lugares Salvos' },
+                    { icone: 'bookmark', rotulo: 'Lugares Salvos', acao: ()=> navigation.navigate('Favoritos')},
                     { icone: 'settings', rotulo: 'Configurações' },
                 ].map((item,indice)=>(
-                    <TouchableOpacity key={indice} style={estilos.itemMenu} onPress={()=>Alert.alert(item.rotulo, 'Disponivel na proxima versao com integracao do backend')}>
+                    <TouchableOpacity key={indice} style={estilos.itemMenu} onPress={item.acao || (()=>Alert.alert(item.rotulo, 'Disponivel na proxima versao com integracao do backend'))}>
                         <Ionicons name={item.icone} size={22} color={CORES.primaria}/>
                         <Text style={estilos.textoMenu}>{item.rotulo}</Text>
                         <Ionicons name="chevron-forward" size={20} color={CORES.textoSecundario}/>
@@ -74,10 +86,7 @@ const estilos = StyleSheet.create({
     botaoProprietario: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
         backgroundColor: CORES.secundaria,
-        marginHorizontal: TAMANHOS.espacamento,
-        marginTop: 24,
-        paddingVertical: 14,
-        borderRadius: TAMANHOS.raio,
+        marginHorizontal: TAMANHOS.espacamento, marginTop: 24, paddingVertical: 14, borderRadius: TAMANHOS.raio,
     },
     textoProprietario: { color: CORES.fundo, fontSize: TAMANHOS.lg, fontWeight: 'bold', marginLeft: 8 },
     botaoSair: {

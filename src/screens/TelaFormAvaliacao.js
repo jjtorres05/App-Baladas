@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Image, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CORES, TAMANHOS } from '../constants/tema';
 import TagRapida from '../components/TagRapida';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { postagemCliente, uploadImagem } from '../services/api';
 
 export default function TelaFormAvaliacao({ route, navigation }) {
     const { local } = route.params;
@@ -28,9 +30,9 @@ export default function TelaFormAvaliacao({ route, navigation }) {
     const [comentario, setComentario] = useState(null);
     const [imagemSelecionada, setImagemSelecionada] = useState(null);
 
-    // ==========================================
+    const [carregando, setCarregando]= useState(false);
+    
     // VERIFICAÇÃO POR GPS
-    // ==========================================
     const verificarPorGPS = async () => {
         setVerificandoGPS(true);
         try {
@@ -86,9 +88,7 @@ export default function TelaFormAvaliacao({ route, navigation }) {
         return R * c;
     };
 
-    // ==========================================
     // VERIFICAÇÃO POR QR CODE
-    // ==========================================
     const verificarPorQR = async () => {
         if (!permissaoCamera?.granted) {
             const resultado = await pedirPermissaoCamera();
@@ -118,9 +118,7 @@ export default function TelaFormAvaliacao({ route, navigation }) {
         }
     };
 
-    // ==========================================
     // IMAGEM
-    // ==========================================
     const escolherImagem = async () => {
         const resultado = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images', 'videos'],
@@ -155,23 +153,45 @@ export default function TelaFormAvaliacao({ route, navigation }) {
         ]);
     };
 
-    // ==========================================
     // ENVIAR
-    // ==========================================
-    const enviar = () => {
+    const enviar = async () => {
         if (!presencaConfirmada) {
             Alert.alert('Confirme sua presença', 'Você precisa confirmar que está no local antes de enviar.');
             return;
         }
-        Alert.alert('Status enviado!', 'Obrigado por compartilhar', [{
-            text: 'OK', onPress: () => navigation.goBack()
-        }]);
-        // TODO: integrar com API → postagemCliente({ ... })
+        setCarregando(true);
+        try{
+            let urlImagem= null;
+            if(imagemSelecionada){
+                urlImagem= await uploadImagem(imagemSelecionada);
+            }
+            const idUsuario = await AsyncStorage.getItem('idUsuario');
+            const idLocal = local.id_estabelecimento || local.id;
+            await postagemCliente({
+                id_usuario: idUsuario,
+                id_estabelecimento: idLocal,
+                legenda: comentario || '',
+                nota: vibe === 'Excelente' ? 5 : vibe === 'Bom' ? 4 : vibe === 'Ok' ? 3 : vibe === 'Fraco' ? 2 : null,
+                vibe,
+                musica,
+                fila,
+                preco,
+                seguranca,
+                pessoas,
+                tempo_espera: tempoEspera,
+                imagem: urlImagem,
+                metodo_presenca: metodoPresenca,
+            });
+            Alert.alert('Status enviado!', 'Obrigado por compartilhar', [{
+                text: 'OK', onPress: () => navigation.goBack()
+            }]);
+        }catch (erro){
+            Alert.alert('Erro',erro.message || 'Nao foi possivel enviar');
+        }
+        setCarregando(false);
     };
 
-    // ==========================================
     // TELA DO SCANNER QR
-    // ==========================================
     if (mostrarCamera) {
         return (
             <SafeAreaView style={estilos.container}>
@@ -198,9 +218,7 @@ export default function TelaFormAvaliacao({ route, navigation }) {
         );
     }
 
-    // ==========================================
     // TELA PRINCIPAL
-    // ==========================================
     return (
         <SafeAreaView style={estilos.container}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={estilos.conteudo}>
@@ -218,7 +236,7 @@ export default function TelaFormAvaliacao({ route, navigation }) {
 
                 <View style={estilos.separador} />
 
-                {/* ============ PRESENÇA ============ */}
+                {/*PRESENÇA*/}
                 <Text style={estilos.pergunta}>Confirme sua presença</Text>
 
                 {presencaConfirmada ? (
@@ -250,7 +268,7 @@ export default function TelaFormAvaliacao({ route, navigation }) {
 
                 <View style={estilos.separador} />
 
-                {/* ============ FORMULÁRIO ============ */}
+                {/*FORMULÁRIO*/}
                 {/* Vibe */}
                 <Text style={estilos.pergunta}>O que você está achando da vibe?</Text>
                 <View style={estilos.opcoes}>
@@ -340,10 +358,13 @@ export default function TelaFormAvaliacao({ route, navigation }) {
 
                 {/* Enviar */}
                 <TouchableOpacity
-                    style={[estilos.botaoEnviar, !presencaConfirmada && estilos.botaoDesabilitado]}
+                    style={[estilos.botaoEnviar, !presencaConfirmada && estilos.botaoDesabilitado, carregando && {opacity:0.6}]}
                     onPress={enviar}
+                    disabled={!presencaConfirmada || carregando}
                 >
-                    <Text style={estilos.textoEnviar}>Enviar agora</Text>
+                    {carregando ? (<ActivityIndicator color={CORES.fundo}/>):(
+                        <Text style={estilos.textoEnviar}>Enviar agora</Text>
+                    )}
                 </TouchableOpacity>
                 <View style={{ height: 30 }} />
             </ScrollView>

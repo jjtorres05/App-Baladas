@@ -1,7 +1,9 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, FlatList } from "react-native";
+import React, {useState, useEffect} from "react";
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, FlatList, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
+import { meusEstabelecimentos } from "../services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MEUS_LOCAIS = [
     { id: '1', nome: '2800 Music Club', categoria: 'Club/Baladas', aberto: true, vibe: 92, avaliacoes: 128 },
@@ -9,6 +11,23 @@ const MEUS_LOCAIS = [
 ];
 
 export default function TelaMeusEstabelecimentos({navigation}){
+    const [locais, setLocais]= useState(MEUS_LOCAIS);
+    const [carregando, setCarregando]= useState(true);
+    useEffect(()=> {
+        carregarLocais();
+    },[]);
+    const carregarLocais = async()=>{
+        try{
+            const idUsuario = await AsyncStorage.getItem('idUsuario');
+            const dados = await meusEstabelecimentos(idUsuario);
+            if(dados && dados.length > 0){
+                setLocais(dados);
+            }
+        }catch (erro){
+            console.log('Usadndo locais mock');
+        }
+        setCarregando(false);
+    };
     const renderLocal = ({item})=>(
         <View style={estilos.cartao}>
             <View style={estilos.cartaoCabecalho}>
@@ -48,12 +67,20 @@ export default function TelaMeusEstabelecimentos({navigation}){
                 <Text style={estilos.titulo}>Meus Estabelecimentos</Text>
                 <View style={{width: 24}}/>
             </View>
-            <FlatList 
-                data={MEUS_LOCAIS}
-                keyExtractor={(item)=> item.id}
+            
+            {carregando ? (
+                <View style={{flex:1, justifyContent: 'center', alignItems:'center'}}>
+                    <ActivityIndicator size='large' color={CORES.primaria}/>
+                </View>
+            ):(
+                <FlatList 
+                data={locais}
+                keyExtractor={(item)=> String(item.id_estabelecimento || item.id)}
                 renderItem={renderLocal}
                 contentContainerStyle={estilos.lista}
-            />
+                />
+            )}
+            
         </SafeAreaView>
     );
 }

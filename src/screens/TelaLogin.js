@@ -1,10 +1,26 @@
 import React, { useState } from "react";
-import { View, Text, TextInput,TouchableOpacity,StyleSheet,SafeAreaView } from "react-native";
+import { View, Text, TextInput,TouchableOpacity,StyleSheet,SafeAreaView, Alert, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
+import { login } from "../services/api";
 export default function TelaLogin({navigation,aoEntrar}){
     const[email,setEmail]=useState('');
     const[senha,setSenha]=useState('');
+    const [carregando, setCarregando] = useState(false);
+    const aoFazerLogin = async ()=>  {
+        if(!email.trim() || !senha.trim()){
+            Alert.alert('Faltam campos de senha ou email');
+            return;
+        }
+        setCarregando(true);
+        try{
+            await login(email,senha);
+            aoEntrar();
+        } catch (erro){
+            Alert.alert('Erro ao entrar',erro.message || 'Verifique suas credenciais');
+        }
+        setCarregando(false);
+    };
     return(
         <SafeAreaView style={estilos.container}>
             <View style={estilos.conteudo}>
@@ -15,7 +31,7 @@ export default function TelaLogin({navigation,aoEntrar}){
                 </Text>
                 <TextInput
                     style={estilos.entrada}
-                    placeholder="email@domini.com"
+                    placeholder="email@dominio.com"
                     placeholderTextColor={CORES.textoMudo}
                     value={email}
                     onChangeText={setEmail}
@@ -30,8 +46,11 @@ export default function TelaLogin({navigation,aoEntrar}){
                     onChangeText={setSenha}
                     secureTextEntry
                 />
-                <TouchableOpacity style={estilos.botao} onPress={aoEntrar}>
-                    <Text style={estilos.textoBotao}>Continuar</Text>
+                <TouchableOpacity style={[estilos.botao, carregando && {opacity:0.6}]} onPress={aoFazerLogin} disabled={carregando}>
+                    {carregando ? (<ActivityIndicator color={CORES.texto}/>)
+                    :(
+                        <Text style={estilos.textoBotao}>Continuar</Text>
+                    )}
                 </TouchableOpacity>
 
                 <View style={estilos.divisor}>
@@ -39,12 +58,6 @@ export default function TelaLogin({navigation,aoEntrar}){
                     <Text style={estilos.textoDivisor}>ou</Text>
                     <View style={estilos.linha}/>
                 </View>
-
-                <TouchableOpacity style={estilos.botaoSocial}>
-                    <Ionicons name="logo-google" size={20} color={CORES.texto}/>
-                    <Text style={estilos.textoSocial}>Continuar com Google</Text>
-                </TouchableOpacity>
-
                 <TouchableOpacity onPress={()=>navigation.navigate('Cadastro')}>
                     <Text style={estilos.textoLink}>
                         Não tem conta? Crie uma conta
@@ -62,7 +75,7 @@ const estilos = StyleSheet.create({
     subtitulo: { fontSize: TAMANHOS.xl, fontWeight: 'bold', color: CORES.texto, textAlign: 'center' },
     descricao: { fontSize: TAMANHOS.md, color: CORES.textoSecundario, textAlign: 'center', marginBottom: 30, marginTop: 8 },
     entrada: { backgroundColor: CORES.superficie, borderRadius: TAMANHOS.raio, padding: 16, color: CORES.texto, fontSize: TAMANHOS.lg, marginBottom: 12, borderWidth: 1, borderColor: CORES.borda },
-    botao: { backgroundColor: CORES.superficie, borderRadius: TAMANHOS.raio, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: CORES.borda, marginTop: 4 },
+    botao: { backgroundColor: CORES.primaria, borderRadius: TAMANHOS.raio, padding: 16, alignItems: 'center', marginTop: 4 },
     textoBotao: { color: CORES.texto, fontSize: TAMANHOS.lg, fontWeight: '600' },
     divisor: { flexDirection: 'row', alignItems: 'center', marginVertical: 24 },
     linha: { flex: 1, height: 1, backgroundColor: CORES.borda },
@@ -70,5 +83,4 @@ const estilos = StyleSheet.create({
     botaoSocial: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: CORES.superficie, borderRadius: TAMANHOS.raio, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: CORES.borda },
     textoSocial: { color: CORES.texto, fontSize: TAMANHOS.lg, marginLeft: 12 },
     textoLink: { color: CORES.primaria, textAlign: 'center', marginTop: 16, fontSize: TAMANHOS.md },
-    termos: { color: CORES.textoMudo, textAlign: 'center', fontSize: TAMANHOS.xs, marginTop: 24, lineHeight: 16 },
 });

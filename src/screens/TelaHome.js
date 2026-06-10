@@ -1,14 +1,41 @@
-import React, { useState } from "react";
-import { View,Text, ScrollView, TextInput, FlatList, StyleSheet, SafeAreaView } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View,Text, ScrollView, TextInput, FlatList, StyleSheet, SafeAreaView, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
 import {LOCAIS } from '../data/dadosMock'
 import CartaoLocal from '../components/CartaoLocal'
+import { listarEstabelecimentos } from "../services/api";
 
 export default function TelaHome({navigation}){
     const [busca, setBusca]= useState('');
-    const locaisFiltrados = busca.trim() ? LOCAIS.filter((l)=> l.nome.toLowerCase().includes(busca.toLowerCase())) : LOCAIS;
+    const [locais, setLocais]= useState(LOCAIS); // comeca com mock como fallback
+    const [carregando, setCarregando]= useState(true);
+    
+    useEffect(()=>{
+        carregarLocais();
+    },[]);
+    const carregarLocais = async ()=> {
+        try{
+            const dados = await listarEstabelecimentos();
+            if(dados && dados.length > 0){
+                setLocais(dados);
+            }
+            //se a API nao retorna nada(porque no tiene establecimentos cadastrados) mantinen los mock
+        }catch (erro){
+            console.log('Usando dados mock(back offline',erro.message);
+        }
+        setCarregando(false);
+    };
+
+    const locaisFiltrados = busca.trim() ? locais.filter((l)=> l.nome.toLowerCase().includes(busca.toLowerCase())) : locais;
     const irParaLocal = (item)=> navigation.navigate('DetalheLocal', {local: item});
+    if(carregando){
+        return(
+            <SafeAreaView style={[estilos.container, {justifyContent:'center', alignItems:'center'}]}>
+                <ActivityIndicator size='large' color={CORES.primaria}/>
+            </SafeAreaView>
+        );
+    }
     return(
         <SafeAreaView style={estilos.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -32,7 +59,7 @@ export default function TelaHome({navigation}){
                         <Text style= {estilos.tituloSecao}>Resultados para "{busca}"</Text>
                         {locaisFiltrados.length > 0 ? (
                             locaisFiltrados.map((item)=>(
-                                <CartaoLocal key={item.id} local={item} aoPresionar={()=>irParaLocal(item)}/>
+                                <CartaoLocal key={item.id || item.id_estabelecimento} local={item} aoPresionar={()=>irParaLocal(item)}/>
                             ))
                         ): (
                             <Text style={estilos.semResultados}>Nenhum local encontrado</Text>
@@ -43,15 +70,15 @@ export default function TelaHome({navigation}){
                         {/* Em Destaque */}
                         <Text style={estilos.tituloSecao}>Em destaque</Text>
                         <FlatList
-                            data={LOCAIS}
+                            data={locais}
                             horizontal
                             showsHorizontalScrollIndicator={false}
-                            keyExtractor={(item)=> item.id}
+                            keyExtractor={(item)=> String(item.id || item.id_estabelecimento)}
                             contentContainerStyle={estilos.listaPadding}
                             renderItem={({item})=>(
                                 <CartaoLocal
                                 local={item}
-                                aoPresionar={()=> navigation.navigate('DetalheLocal',{local:item})}
+                                aoPresionar={()=> irParaLocal(item)}
                                 />
                             )}
                         />
@@ -59,16 +86,16 @@ export default function TelaHome({navigation}){
                         {/* Baladas Perto */}
                         <Text style={estilos.tituloSecao}>Baladas perto</Text>
                         <FlatList
-                            data={LOCAIS.filter((l)=> l.categoria==='Club/Baladas')}
+                            data={locais.filter((l)=> l.categoria==='Club/Baladas')}
                             horizontal
                             showsHorizontalScrollIndicator={false}
-                            keyExtractor={(item)=> item.id}
+                            keyExtractor={(item)=> String(item.id || item.id_estabelecimento)}
                             contentContainerStyle={estilos.listaPadding}
                             renderItem={({item})=>(
                                 <CartaoLocal
                                     local={item}
                                     tamanho="pequeno"
-                                    aoPresionar={()=> navigation.navigate('DetalheLocal',{local: item})}
+                                    aoPresionar={()=> irParaLocal(item)}
                                 />
                             )}
                         />
@@ -76,15 +103,15 @@ export default function TelaHome({navigation}){
                         {/* Top da Noite */}
                         <Text style={estilos.tituloSecao}>Top da noite</Text>
                         <FlatList
-                            data={LOCAIS}
+                            data={locais}
                             horizontal
                             showsHorizontalScrollIndicator={false}
-                            keyExtractor={(item)=> item.id}
+                            keyExtractor={(item)=> String(item.id || item.id_estabelecimento)}
                             contentContainerStyle={estilos.listaPadding}
                             renderItem={({item})=>(
                                 <CartaoLocal
                                     local={item}
-                                    aoPresionar={()=> navigation.navigate('DetalheLocal',{local:item})}
+                                    aoPresionar={()=> irParaLocal(item)}
                                 />
                             )}
                         />

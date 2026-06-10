@@ -1,16 +1,33 @@
-import React, {useState} from "react";
-import { Text, View,ScrollView,TextInput,StyleSheet,Image,SafeAreaView} from "react-native";
+import React, {useState, useEffect} from "react";
+import { Text, View,ScrollView,TextInput,StyleSheet,Image,SafeAreaView, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
 import CartaoCategoria from "../components/CartaoCategoria"
 import {CATEGORIAS, LOCAIS} from "../data/dadosMock"
 import CartaoLocal from "../components/CartaoLocal";
+import { listarEstabelecimentos } from "../services/api";
 
 export default function TelaExplorar({navigation}){
     const [busca, setBusca]= useState('');
-    const locaisFiltrados = busca.trim() ? LOCAIS.filter((l)=> l.nome.toLowerCase().includes(busca.toLowerCase()) || 
-        l.categoria.toLowerCase().includes(busca.toLowerCase())
-    ) : [];   
+    const [locais, setLocais]= useState(LOCAIS);
+
+    useEffect(()=> {
+        carregarLocais();
+    },[]);
+    const carregarLocais= async ()=>{
+        try{
+            const dados = await listarEstabelecimentos();
+            if(dados && dados.length > 0){
+                setLocais(dados);
+            }
+        }catch(erro){
+            console.log('Usando dados mock no explorar');
+        }
+    };
+    const locaisFiltrados = busca.trim() ? locais.filter((l) =>
+    l.nome.toLowerCase().includes(busca.toLowerCase()) ||
+    (l.categoria && l.categoria.toLowerCase().includes(busca.toLowerCase()))
+) : [];
 
 
     return(
@@ -34,7 +51,7 @@ export default function TelaExplorar({navigation}){
                         <Text style={estilos.tituloSecao}>Resultados para "{busca}"</Text>
                         {locaisFiltrados.length > 0 ? (
                             locaisFiltrados.map((item)=> (
-                                <CartaoLocal key={item.id}local={item}aoPresionar={()=>navigation.navigate('DetalheLocal',{local: item})}/>
+                                <CartaoLocal key={item.id || item.id_estabelecimento}local={item}aoPresionar={()=>navigation.navigate('DetalheLocal',{local: item})}/>
                             ))
                         ) : (
                             <Text style={estilos.semResultados}>Nenhum local encontrado</Text>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { View,Text,TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from "react-native";
+import { View,Text,TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert, ActivityIndicator } from "react-native";
 import { CORES,TAMANHOS } from "../constants/tema";
+import { registro } from "../services/api";
 
 export default function TelaCadastro({navigation, aoEntrar}){
 
@@ -8,6 +9,22 @@ export default function TelaCadastro({navigation, aoEntrar}){
     const [username,setUsername]= useState('');
     const [email,setEmail]= useState('');
     const [senha,setSenha]= useState('');
+    const [carregando, setCarregando]= useState(false);
+    const aoCadastrar = async () => {
+        if (!nome.trim() || !username.trim() || !email.trim() || !senha.trim()) {
+            Alert.alert('Erro', 'Preencha todos os campos');
+            return;
+        }
+
+        setCarregando(true);
+        try {
+            await registro(nome, username, email, senha, 'cliente');
+            aoEntrar();
+        } catch (erro) {
+            Alert.alert('Erro ao cadastrar', erro.message || 'Tente novamente');
+        }
+        setCarregando(false);
+    };
 
     return(
         <SafeAreaView style={estilos.container}>
@@ -54,8 +71,10 @@ export default function TelaCadastro({navigation, aoEntrar}){
                     secureTextEntry
                 />
                 {/*>Botao cadastrar */}
-                <TouchableOpacity style={estilos.botao} onPress={aoEntrar}>
-                    <Text style={estilos.textoBotao}>Criar Conta</Text>
+                <TouchableOpacity style={[estilos.botao, carregando && {opacity:0.6}]} onPress={aoCadastrar} disabled={carregando}>
+                    {carregando ? ( <ActivityIndicator color={CORES.texto}/>):(
+                        <Text style={estilos.textoBotao}>Criar Conta</Text>
+                    )}
                 </TouchableOpacity>
                 {/**Link para login */}
                 <TouchableOpacity onPress={()=>navigation.navigate('Login')}>

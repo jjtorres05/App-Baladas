@@ -2,17 +2,26 @@ import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { CORES, TAMANHOS } from '../constants/tema';
 import { Ionicons } from '@expo/vector-icons';
+import { reagir, denunciar } from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function PostStatus({ post }) {
     const [reacao, setReacao] = useState(null); // 'concordar' | 'discordar' | null
 
-    const aoReagir = (tipo) => {
+    const aoReagir = async (tipo) => {
         if (reacao === tipo) {
             setReacao(null); // desfaz a reação
         } else {
             setReacao(tipo);
         }
-        // TODO: integrar com API → reagir(idUsuario, post.id, tipo)
+        try{
+            const idUsuario = await AsyncStorage.getItem('idUsuario');
+            const idPostagem = post.id_postagem || post.id;
+            await reagir(idUsuario,idPostagem, tipo);
+        }catch (erro){
+            console.log('Erro ao reagir (back offilne):',erro.message);
+        }
     };
 
     const aoDenunciar = () => {
@@ -28,9 +37,16 @@ export default function PostStatus({ post }) {
         );
     };
 
-    const confirmarDenuncia = (tipo) => {
-        Alert.alert('Denúncia enviada', 'Obrigado por ajudar a manter a comunidade segura.');
-        // TODO: integrar com API → denunciar(idUsuario, post.id, tipo)
+    const confirmarDenuncia = async (tipo) => {
+        try{
+            const idUsuario = await AsyncStorage.getItem('idUsuario');
+            const idPostagem = post.id_postagem || post.id;
+            await denunciar(idUsuario,idPostagem,tipo);
+            Alert.alert('Denúncia enviada', 'Obrigado por ajudar a manter a comunidade segura.');
+        }catch(erro){
+            Alert.alert('Denuncia registrada','Obrigado pelo aviso');
+            console.log('Erro ao denunciar',erro.message);
+        }
     };
 
     return (

@@ -4,6 +4,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { CORES, TAMANHOS } from "../constants/tema";
 import * as ImagePicker from 'expo-image-picker';
 import TagRapida from "../components/TagRapida";
+import { cadastrarEstabelecimento, uploadImagem } from "../services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function TelaCadastroEstabelecimento({navigation}){
     const [nome, setNome]= useState('');
@@ -48,14 +50,35 @@ export default function TelaCadastroEstabelecimento({navigation}){
             ]);
     };
 
-    const cadastrar = ()=>{
-        if(!nome.trim() || !rua || !numero || !categoria){
-            Alert.alert('Campos obrigatorios', 'Prencha pelo menos os campos de nome, endereco e categoria');
+    const cadastrar = async ()=>{
+        if (!nome.trim() || !rua || !numero || !categoria){
+            Alert.alert('Campos obrigatorios', 'Preencha pelo menos o nome, endereco e categoria');
             return;
         }
-        Alert.alert('Estabelecimento cadastrado!', `"${nome}" foi registrado com sucesso \nQr Code gerado automaticamente`,
-            [{text: 'OK', onPress: ()=> navigation.goBack()}]
-        );
+        try{
+            let urlImagem = null;
+            if(imagemSelecionada){
+                urlImagem= await uploadImagem(imagemSelecionada);
+            }
+            const idUsuario= await AsyncStorage.getItem('idUsuario');
+            await cadastrarEstabelecimento({
+                id_proprietario: idUsuario,
+                nome,
+                categoria,
+                descricao,
+                rua,
+                bairro,
+                numero,
+                complemento,
+                telefone,
+                imagem: urlImagem,
+            });
+            Alert.alert('Estabelecimentos cadastrado!',`"${nome}" foi registrado com sucesso\n QR code gerado automaticamente`,
+                [{text: 'OK', onPress:()=> navigation.goBack()}]
+            );
+        }catch (erro){
+            Alert.alert(`Erro`,erro.message || 'Nao foi possivel cadastrar');
+        }
     };
     return (
         <SafeAreaView style={estilos.container}>
