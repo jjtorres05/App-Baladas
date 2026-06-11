@@ -9,10 +9,13 @@ from .models import (
     Postagem,
     PostagemCliente,
     PostagemEstabelecimento,
+    PostagemEvento,
     Foto,
     Denuncia,
     Reacao,
     Favoritar,
+    FavoritarEstabelecimento,
+    Presenca,
     Endereco,
     Cpf,
 )
@@ -105,4 +108,22 @@ class ReacaoSerializer(serializers.ModelSerializer):
 class FavoritarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favoritar
+        fields = "__all__"
+
+
+class PostagemEventoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostagemEvento
+        fields = "__all__"
+
+
+class FavoritarEstabelecimentoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FavoritarEstabelecimento
+        fields = "__all__"
+
+
+class PresencaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Presenca
         fields = "__all__"

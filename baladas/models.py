@@ -70,6 +70,7 @@ class Estabelecimento(models.Model):
     latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     aberto = models.BooleanField(default=True)
+    media_nota = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -105,6 +106,15 @@ class Postagem(models.Model):
     id_estabelecimento = models.ForeignKey(Estabelecimento, models.DO_NOTHING, db_column='id_estabelecimento', blank=True, null=True)
     legenda = models.TextField(blank=True, null=True)
     avaliacoes = models.IntegerField(blank=True, null=True)
+    imagem = models.TextField(blank=True, null=True)
+    vibe = models.CharField(max_length=20, blank=True, null=True)
+    musica = models.CharField(max_length=30, blank=True, null=True)
+    fila = models.CharField(max_length=20, blank=True, null=True)
+    preco = models.CharField(max_length=10, blank=True, null=True)
+    seguranca = models.CharField(max_length=20, blank=True, null=True)
+    pessoas = models.IntegerField(blank=True, null=True)
+    tempo_espera = models.CharField(max_length=20, blank=True, null=True)
+    metodo_presenca = models.CharField(max_length=10, blank=True, null=True)
     data_postagem = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -157,7 +167,7 @@ class Denuncia(models.Model):
 class Reacao(models.Model):
     id_reacao = models.AutoField(primary_key=True)
     id_usuario = models.ForeignKey(Usuario, models.DO_NOTHING, db_column='id_usuario')
-    id_postagem_cliente = models.ForeignKey(PostagemCliente, models.DO_NOTHING, db_column='id_postagem_cliente')
+    id_postagem = models.ForeignKey(Postagem, models.DO_NOTHING, db_column='id_postagem')
     tipo_reacao = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
@@ -173,3 +183,38 @@ class Favoritar(models.Model):
     class Meta:
         managed = False
         db_table = 'favoritar'
+
+class PostagemEvento(models.Model):
+    id_postagem = models.OneToOneField(Postagem, models.DO_NOTHING, db_column='id_postagem', primary_key=True)
+    titulo = models.CharField(max_length=100, blank=True, null=True)
+    descricao = models.TextField(blank=True, null=True)
+    promocao = models.TextField(blank=True, null=True)
+    data_evento = models.DateField(blank=True, null=True)
+    imagem = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'postagem_evento'
+
+
+class FavoritarEstabelecimento(models.Model):
+    pk = models.CompositePrimaryKey('id_usuario', 'id_estabelecimento')
+    id_usuario = models.ForeignKey(Cliente, models.DO_NOTHING, db_column='id_usuario')
+    id_estabelecimento = models.ForeignKey(Estabelecimento, models.DO_NOTHING, db_column='id_estabelecimento')
+
+    class Meta:
+        managed = False
+        db_table = 'favoritar_estabelecimento'
+
+
+class Presenca(models.Model):
+    id_presenca = models.AutoField(primary_key=True)
+    id_usuario = models.ForeignKey(Usuario, models.DO_NOTHING, db_column='id_usuario')
+    id_estabelecimento = models.ForeignKey(Estabelecimento, models.DO_NOTHING, db_column='id_estabelecimento', blank=True, null=True)
+    qr_code = models.TextField(blank=True, null=True)
+    metodo = models.CharField(max_length=10, blank=True, null=True)
+    data_confirmada = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'presenca'

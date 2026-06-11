@@ -86,11 +86,14 @@ WSGI_APPLICATION = "qual_a_boa.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "App-baladas",
+        "NAME": "qualboa",
         "USER": "postgres",
         "PASSWORD": "3291",
         "HOST": "localhost",
         "PORT": "5432",
+        "OPTIONS": {
+            "options": "-c search_path=qualboa_schema,public "
+        },
     }
 }
 

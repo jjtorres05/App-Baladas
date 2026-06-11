@@ -11,8 +11,10 @@ import os
 from .models import (
     Usuario, Cliente, Proprietario,
     Estabelecimento, Cardapio, Produto,
-    Postagem, PostagemCliente, PostagemEstabelecimento,
-    Foto, Denuncia, Reacao, Favoritar, Endereco, Cpf,
+    Postagem, PostagemCliente, PostagemEstabelecimento, PostagemEvento,
+    Foto, Denuncia, Reacao, Favoritar,
+    FavoritarEstabelecimento, Presenca,
+    Endereco, Cpf,
 )
 from .serializers import (
     UsuarioSerializer, ClienteSerializer, ProprietarioSerializer,
@@ -181,7 +183,16 @@ class PostagemClienteView(APIView):
             id_usuario=Usuario.objects.get(pk=request.data.get('id_usuario')),
             id_estabelecimento=Estabelecimento.objects.get(pk=request.data.get('id_estabelecimento')) if request.data.get('id_estabelecimento') else None,
             legenda=request.data.get('legenda'),
-            avaliacoes=0
+            avaliacoes=0,
+            imagem=request.data.get('imagem'),
+            vibe=request.data.get('vibe'),
+            musica=request.data.get('musica'),
+            fila=request.data.get('fila'),
+            preco=request.data.get('preco'),
+            seguranca=request.data.get('seguranca'),
+            pessoas=request.data.get('pessoas'),
+            tempo_espera=request.data.get('tempo_espera'),
+            metodo_presenca=request.data.get('metodo_presenca'),
         )
 
         PostagemCliente.objects.create(
@@ -227,27 +238,25 @@ class PostagemEstabelecimentoView(APIView):
 
 class EventoView(APIView):
     def post(self, request):
-        proprietario = Proprietario.objects.get(pk=request.data.get('id_proprietario'))
+        id_usuario = request.data.get('id_usuario')
+        usuario = Usuario.objects.get(pk=id_usuario) if id_usuario else None
 
         postagem = Postagem.objects.create(
-            id_usuario=proprietario.id_usuario,
+            id_usuario=usuario,
             id_estabelecimento=Estabelecimento.objects.get(pk=request.data.get('id_estabelecimento')) if request.data.get('id_estabelecimento') else None,
-            legenda=request.data.get('legenda'),
-            avaliacoes=0
+            legenda=request.data.get('descricao'),
+            imagem=request.data.get('imagem'),
+            avaliacoes=0,
         )
 
-        PostagemEstabelecimento.objects.create(
+        PostagemEvento.objects.create(
             id_postagem=postagem,
-            promocoes=request.data.get('promocoes', None)
+            titulo=request.data.get('titulo'),
+            descricao=request.data.get('descricao'),
+            promocao=request.data.get('promocao'),
+            data_evento=request.data.get('data_evento'),
+            imagem=request.data.get('imagem'),
         )
-
-        url_foto = request.data.get('url_foto', None)
-        if url_foto:
-            Foto.objects.create(
-                url=url_foto,
-                id_usuario=proprietario.id_usuario,
-                id_postagem=postagem
-            )
 
         return Response({"id_postagem": postagem.id_postagem}, status=201)
 
@@ -304,7 +313,7 @@ class ReacaoView(APIView):
 
         reacao = Reacao.objects.create(
             id_usuario=Usuario.objects.get(pk=request.data.get('id_usuario')),
-            id_postagem_cliente=PostagemCliente.objects.get(pk=request.data.get('id_postagem')),
+            id_postagem=Postagem.objects.get(pk=request.data.get('id_postagem')),
             tipo_reacao=tipo
         )
 
@@ -382,9 +391,16 @@ class ConfirmarPresencaView(APIView):
             return Response({"erro": "QR code invalido"}, status=404)
 
         try:
-            cliente = Cliente.objects.get(pk=request.data.get('id_usuario'))
-        except Cliente.DoesNotExist:
-            return Response({"erro": "Usuario nao e cliente"}, status=400)
+            usuario = Usuario.objects.get(pk=request.data.get('id_usuario'))
+        except Usuario.DoesNotExist:
+            return Response({"erro": "Usuario nao encontrado"}, status=400)
+
+        Presenca.objects.create(
+            id_usuario=usuario,
+            id_estabelecimento=estabelecimento,
+            qr_code=request.data.get('qr_code'),
+            metodo='qr',
+        )
 
         return Response({
             "mensagem": "presenca confirmada",
