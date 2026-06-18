@@ -1,21 +1,23 @@
-# Ambiente Virtual
-venv/
-.venv/
-env/
-
-# Banco de dados local 
-db.sqlite3
-
-# Arquivos compilados do Python
+# Python
 __pycache__/
 *.pyc
 *.pyo
-
-# Variáveis de ambiente e senhas
+venv/
+*.sqlite3
 .env
 
-# Arquivos de mídia
-media/
+# Node
+node_modules/
+.expo/
+npm-debug.log*
 
-# Arquivos estáticos coletados em produção
-staticfiles/
+# Media uploads
+backend/media/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
