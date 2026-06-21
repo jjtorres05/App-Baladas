@@ -97,6 +97,23 @@ export const getUsuarioLogado = async () => {
 };
 
 
+// PERFIL
+
+// PUT /api/perfil/
+export const atualizarPerfil = (idUsuario, nome, email, telefone) =>
+    requisicao('/perfil/', {
+        method: 'PUT',
+        body: JSON.stringify({ id_usuario: idUsuario, nome, email, telefone }),
+    });
+
+// POST /api/perfil/senha/
+export const alterarSenha = (idUsuario, senhaAtual, novaSenha) =>
+    requisicao('/perfil/senha/', {
+        method: 'POST',
+        body: JSON.stringify({ id_usuario: idUsuario, senha_atual: senhaAtual, nova_senha: novaSenha }),
+    });
+
+
 // ESTABELECIMENTOS
 
 // GET /api/estabelecimentos/

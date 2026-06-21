@@ -16,6 +16,8 @@ from .views import (
     ProdutoView,
     ConfirmarPresencaView,
     UploadImagemView,
+    PerfilView,
+    AlterarSenhaView,
 )
 
 urlpatterns = [
@@ -48,4 +50,8 @@ urlpatterns = [
 
     # upload
     path('upload/', UploadImagemView.as_view()),
+
+    # perfil
+    path('perfil/', PerfilView.as_view()),
+    path('perfil/senha/', AlterarSenhaView.as_view()),
 ]

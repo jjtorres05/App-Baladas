@@ -474,3 +474,70 @@ class UploadImagemView(APIView):
 
         url = f"{settings.MEDIA_URL}{nome_arquivo}"
         return Response({"url": url}, status=201)
+
+
+class PerfilView(APIView):
+    def get(self, request):
+        id_usuario = request.query_params.get('id_usuario')
+        try:
+            usuario = Usuario.objects.get(pk=id_usuario)
+        except Usuario.DoesNotExist:
+            return Response({"erro": "Usuário não encontrado"}, status=404)
+
+        return Response({
+            "id_usuario": usuario.id_usuario,
+            "nome": usuario.nome,
+            "username": usuario.username,
+            "email": usuario.email,
+            "telefone": usuario.telefone,
+        }, status=200)
+
+    def put(self, request):
+        id_usuario = request.data.get('id_usuario')
+        try:
+            usuario = Usuario.objects.get(pk=id_usuario)
+        except Usuario.DoesNotExist:
+            return Response({"erro": "Usuário não encontrado"}, status=404)
+
+        nome = request.data.get('nome')
+        email = request.data.get('email')
+        telefone = request.data.get('telefone')
+
+        if email and email != usuario.email:
+            if Usuario.objects.filter(email=email).exclude(pk=id_usuario).exists():
+                return Response({"erro": "Email já cadastrado"}, status=400)
+
+        if nome:
+            usuario.nome = nome
+        if email:
+            usuario.email = email
+        if telefone is not None:
+            usuario.telefone = telefone
+
+        usuario.save()
+
+        return Response({
+            "nome": usuario.nome,
+            "email": usuario.email,
+            "telefone": usuario.telefone,
+        }, status=200)
+
+
+class AlterarSenhaView(APIView):
+    def post(self, request):
+        id_usuario = request.data.get('id_usuario')
+        senha_atual = request.data.get('senha_atual')
+        nova_senha = request.data.get('nova_senha')
+
+        try:
+            usuario = Usuario.objects.get(pk=id_usuario)
+        except Usuario.DoesNotExist:
+            return Response({"erro": "Usuário não encontrado"}, status=404)
+
+        if not check_password(senha_atual, usuario.senha):
+            return Response({"erro": "Senha atual inválida"}, status=401)
+
+        usuario.senha = make_password(nova_senha)
+        usuario.save()
+
+        return Response({"mensagem": "Senha alterada com sucesso"}, status=200)
