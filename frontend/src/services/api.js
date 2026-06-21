@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 //trocar pelo endereco ip
-const BASE_URL = 'http://191.52.80.191:8000/api';
+const BASE_URL = 'http://192.168.0.201:8000/api';
 
 // HELPER PRINCIPAL — Todas as funcoes usam isso por dentro
 // Agrega token JWT automáticamente a cada request
@@ -124,9 +124,14 @@ export const meusEstabelecimentos = (idProprietario) =>
 
 
 // GET /api/postagens/?id_estabelecimento=X
-// Usado en: TelaDetalheLocal (ver reviews de un bar)
+// Usado en: TelaDetalheLocal (ver reviews de clientes)
 export const postagensDoLocal = (idEstabelecimento) =>
     requisicao(`/postagens/?id_estabelecimento=${idEstabelecimento}`);
+
+// GET /api/eventos/?id_estabelecimento=X
+// Usado en: TelaDetalheLocal (ver eventos do local)
+export const eventosDoLocal = (idEstabelecimento) =>
+    requisicao(`/eventos/?id_estabelecimento=${idEstabelecimento}`);
 
 // POST /api/postagens/cliente/
 // Usado en: TelaFormAvaliacao (cliente hace review)

@@ -16,6 +16,8 @@ export default function TelaCadastroEstabelecimento({navigation}){
     const [telefone, setTelefone]= useState('');
     const [categoria, setCategoria]= useState('');
     const [descricao, setDescricao]= useState('');
+    const [latitude, setLatitude]= useState('');
+    const [longitude, setLongitude]= useState('');
     const [imagemSelecionada, setImagemSelecionada]= useState(null);
     const categorias= ['Club/Baladas', 'Musica ao vivo', 'Barzinhos', 'Ao ar livre'];
     const escolherImagem = async ()=> {
@@ -71,6 +73,8 @@ export default function TelaCadastroEstabelecimento({navigation}){
                 numero,
                 complemento,
                 telefone,
+                latitude: latitude ? parseFloat(latitude) : null,
+                longitude: longitude ? parseFloat(longitude) : null,
                 imagem: urlImagem,
             });
             Alert.alert('Estabelecimentos cadastrado!',`"${nome}" foi registrado com sucesso\n QR code gerado automaticamente`,
@@ -114,6 +118,12 @@ export default function TelaCadastroEstabelecimento({navigation}){
                     <TextInput style={[estilos.entrada, {flex: 2}]} placeholder="Bairro" placeholderTextColor={CORES.textoMudo} value={bairro} onChangeText={setBairro}/>
                 </View>
                 <TextInput style={estilos.entrada} placeholder="Complemento (opcional)" placeholderTextColor={CORES.textoMudo} value={complemento} onChangeText={setComplemento}/>
+                {/*Localizacao */}
+                <Text style={estilos.rotulo}>Localização no mapa (opcional)</Text>
+                <View style={estilos.linhaEndereco}>
+                    <TextInput style={[estilos.entrada, {flex: 1, marginRight: 8}]} placeholder="Ex: -23.3045" placeholderTextColor={CORES.textoMudo} value={latitude} onChangeText={setLatitude} keyboardType="numbers-and-punctuation"/>
+                    <TextInput style={[estilos.entrada, {flex: 1}]} placeholder="Ex: -51.1696" placeholderTextColor={CORES.textoMudo} value={longitude} onChangeText={setLongitude} keyboardType="numbers-and-punctuation"/>
+                </View>
                 {/*Telefone */}
                 <Text style={estilos.rotulo}>Telefone</Text>
                 <TextInput style={estilos.entrada} placeholder="(11) 99999-9999" placeholderTextColor={CORES.textoMudo} value={telefone} onChangeText={setTelefone} keyboardType="phone-pad"/>

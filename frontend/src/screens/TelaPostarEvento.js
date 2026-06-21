@@ -89,13 +89,20 @@ export default function TelaPostarEvento({navigation}){
             }
             const idLocal= localSelecionado.id_estabelecimento || localSelecionado.id;
             const idUsuario = await AsyncStorage.getItem('idUsuario');
+            let dataFormatada = null;
+            if (data) {
+                const partes = data.split('/');
+                if (partes.length === 3) {
+                    dataFormatada = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                }
+            }
             await postagemEvento({
                 id_usuario: idUsuario,
                 id_estabelecimento: idLocal,
                 titulo,
                 descricao,
                 promocao,
-                data_evento: data,
+                data_evento: dataFormatada,
                 imagem: urlImagem,
             });
             Alert.alert('Evento Publicado!', `"${titulo}" foi publicado em ${localSelecionado.nome}`, [

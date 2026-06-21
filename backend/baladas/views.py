@@ -279,8 +279,9 @@ class PostagensEstabelecimentoView(APIView):
             return Response({"erro": "id_estabelecimento é obrigatório"}, status=400)
 
         postagens = Postagem.objects.filter(
-            id_estabelecimento=id_estabelecimento
-        ).select_related('id_usuario').prefetch_related('foto_set', 'postagemcliente')
+            id_estabelecimento=id_estabelecimento,
+            postagemcliente__isnull=False,
+        ).select_related('id_usuario')
 
         resultado = []
         for p in postagens:
@@ -297,10 +298,40 @@ class PostagensEstabelecimentoView(APIView):
                 "avaliacoes": p.avaliacoes,
                 "nota": nota,
                 "fotos": fotos,
+                "imagem": p.imagem,
                 "usuario": {
                     "id_usuario": p.id_usuario.id_usuario,
                     "nome": p.id_usuario.nome,
                     "username": p.id_usuario.username,
+                }
+            })
+
+        return Response(resultado, status=200)
+
+
+class EventosEstabelecimentoView(APIView):
+    def get(self, request):
+        id_estabelecimento = request.query_params.get('id_estabelecimento')
+
+        if not id_estabelecimento:
+            return Response({"erro": "id_estabelecimento é obrigatório"}, status=400)
+
+        eventos = PostagemEvento.objects.filter(
+            id_postagem__id_estabelecimento=id_estabelecimento
+        ).select_related('id_postagem', 'id_postagem__id_usuario')
+
+        resultado = []
+        for e in eventos:
+            resultado.append({
+                "id_postagem": e.id_postagem.id_postagem,
+                "titulo": e.titulo,
+                "descricao": e.descricao,
+                "promocao": e.promocao,
+                "data_evento": e.data_evento,
+                "imagem": e.imagem or e.id_postagem.imagem,
+                "usuario": {
+                    "nome": e.id_postagem.id_usuario.nome,
+                    "username": e.id_postagem.id_usuario.username,
                 }
             })
 

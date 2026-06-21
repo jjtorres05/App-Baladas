@@ -7,6 +7,7 @@ from .views import (
     PostagemClienteView,
     PostagemEstabelecimentoView,
     PostagensEstabelecimentoView,
+    EventosEstabelecimentoView,
     EventoView,
     ReacaoView,
     DenunciaView,
@@ -31,6 +32,7 @@ urlpatterns = [
     path('postagens/estabelecimento/', PostagemEstabelecimentoView.as_view()),
     path('postagens/evento/', EventoView.as_view()),
     path('postagens/', PostagensEstabelecimentoView.as_view()),
+    path('eventos/', EventosEstabelecimentoView.as_view()),
 
     # interações
     path('reacoes/', ReacaoView.as_view()),

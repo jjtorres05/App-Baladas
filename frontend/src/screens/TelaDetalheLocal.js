@@ -5,32 +5,53 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CORES, TAMANHOS } from '../constants/tema';
 import { POSTS_STATUS } from '../data/dadosMock';
 import PostStatus from '../components/PostStatus';
-import { postagensDoLocal } from '../services/api';
+import { postagensDoLocal, eventosDoLocal, listarProdutos } from '../services/api';
 
 export default function TelaDetalheLocal({ route, navigation }) {
     const { local } = route.params;
     const [ehFavorito, setEhFavorito] = useState(false);
 
-    // Posts desse local (mock por enquanto, depois vem da API)
-    const [postLocal, setPostLocal]= useState([]);
+    const [postLocal, setPostLocal] = useState([]);
+    const [eventos, setEventos] = useState([]);
+    const [produtos, setProdutos] = useState([]);
 
-    useEffect(()=>{
-        carregarPosts();
-    },[]);
-    const carregarPosts = async() => {
+    useEffect(() => {
+        const idLocal = local.id_estabelecimento || local.id;
+        carregarPosts(idLocal);
+        carregarEventos(idLocal);
+        carregarCardapio(idLocal);
+    }, []);
+
+    const carregarPosts = async (idLocal) => {
         try {
-            const idLocal= local.id_estabelecimento || local.id;
             const dados = await postagensDoLocal(idLocal);
-            if(dados && dados.length > 0){
+            if (dados && dados.length > 0) {
                 setPostLocal(dados);
-            }else{
-                //Api respondeu mas nao tem posts usa mock
-                const mock= POSTS_STATUS.filter((p)=>p.localId===idLocal);
+            } else {
+                const mock = POSTS_STATUS.filter((p) => p.localId === idLocal);
                 setPostLocal(mock);
             }
-        }catch(erro){//Api nao respondeu
-            const mock = POSTS_STATUS.filter((p)=> p.localId===(local.id_estabelecimento || local.id));
+        } catch (erro) {
+            const mock = POSTS_STATUS.filter((p) => p.localId === (local.id_estabelecimento || local.id));
             setPostLocal(mock);
+        }
+    };
+
+    const carregarEventos = async (idLocal) => {
+        try {
+            const dados = await eventosDoLocal(idLocal);
+            if (dados) setEventos(dados);
+        } catch (erro) {
+            console.log('Sem eventos');
+        }
+    };
+
+    const carregarCardapio = async (idLocal) => {
+        try {
+            const dados = await listarProdutos(idLocal);
+            if (dados) setProdutos(dados);
+        } catch (erro) {
+            console.log('Sem cardápio');
         }
     };
 
@@ -162,6 +183,50 @@ export default function TelaDetalheLocal({ route, navigation }) {
                     </View>
                 )}
 
+                {/* Eventos */}
+                {eventos.length > 0 && (
+                    <View style={estilos.secao}>
+                        <Text style={estilos.tituloSecao}>Eventos</Text>
+                        {eventos.map((evento) => (
+                            <View key={evento.id_postagem} style={estilos.cartaoEvento}>
+                                {evento.imagem && (
+                                    <Image source={{ uri: evento.imagem }} style={estilos.imagemEvento} />
+                                )}
+                                <Text style={estilos.tituloEvento}>{evento.titulo}</Text>
+                                {evento.data_evento && (
+                                    <View style={estilos.linhaDetalhe}>
+                                        <Ionicons name="calendar-outline" size={16} color={CORES.primaria} />
+                                        <Text style={estilos.textoDetalhe}>{evento.data_evento}</Text>
+                                    </View>
+                                )}
+                                <Text style={estilos.descricao}>{evento.descricao}</Text>
+                                {evento.promocao && (
+                                    <View style={estilos.badgePromocao}>
+                                        <Ionicons name="pricetag-outline" size={14} color={CORES.secundaria} />
+                                        <Text style={estilos.textoPromocao}>{evento.promocao}</Text>
+                                    </View>
+                                )}
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {/* Cardápio */}
+                {produtos.length > 0 && (
+                    <View style={estilos.secao}>
+                        <Text style={estilos.tituloSecao}>Cardápio</Text>
+                        {produtos.map((item) => (
+                            <View key={item.id_produto || item.id} style={estilos.itemProduto}>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={estilos.nomeProduto}>{item.nome}</Text>
+                                    {item.descricao && <Text style={estilos.descProduto}>{item.descricao}</Text>}
+                                </View>
+                                <Text style={estilos.precoProduto}>R$ {item.preco}</Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
                 {/* Opiniões / Status */}
                 <View style={estilos.secao}>
                     <Text style={estilos.tituloSecao}>Opiniões recentes</Text>
@@ -264,6 +329,51 @@ const estilos = StyleSheet.create({
         textAlign: 'center',
         marginTop: 20,
     },
+    cartaoEvento: {
+        backgroundColor: CORES.superficie,
+        borderRadius: TAMANHOS.raio,
+        padding: 14,
+        marginBottom: 10,
+    },
+    imagemEvento: {
+        width: '100%',
+        height: 150,
+        borderRadius: TAMANHOS.raio,
+        marginBottom: 10,
+    },
+    tituloEvento: {
+        color: CORES.texto,
+        fontSize: TAMANHOS.lg,
+        fontWeight: 'bold',
+        marginBottom: 4,
+    },
+    badgePromocao: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: CORES.cartao,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 12,
+        marginTop: 8,
+        alignSelf: 'flex-start',
+    },
+    textoPromocao: {
+        color: CORES.secundaria,
+        fontSize: TAMANHOS.sm,
+        fontWeight: '600',
+        marginLeft: 4,
+    },
+    itemProduto: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: CORES.superficie,
+        padding: 14,
+        borderRadius: TAMANHOS.raio,
+        marginBottom: 8,
+    },
+    nomeProduto: { color: CORES.texto, fontSize: TAMANHOS.md, fontWeight: '600' },
+    descProduto: { color: CORES.textoMudo, fontSize: TAMANHOS.sm, marginTop: 2 },
+    precoProduto: { color: CORES.secundaria, fontSize: TAMANHOS.lg, fontWeight: 'bold' },
     botaoAvaliar: {
         backgroundColor: CORES.secundaria,
         marginHorizontal: TAMANHOS.espacamento,
