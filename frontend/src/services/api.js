@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 //trocar pelo endereco ip
-const BASE_URL = 'http://191.52.86.59:8000/api';
+const BASE_URL = 'http://191.52.80.191:8000/api';
 
 // HELPER PRINCIPAL — Todas as funcoes usam isso por dentro
 // Agrega token JWT automáticamente a cada request
@@ -51,11 +51,12 @@ export const login = async (email, senha) => {
         body: JSON.stringify({ email, senha }),
     });
 
-    // Guarda token e datos d usuario en el celular
     await AsyncStorage.setItem('token', dados.access);
     await AsyncStorage.setItem('refreshToken', dados.refresh);
     await AsyncStorage.setItem('idUsuario', String(dados.id_usuario));
     await AsyncStorage.setItem('username', dados.username);
+    await AsyncStorage.setItem('nome', dados.nome || '');
+    await AsyncStorage.setItem('email', dados.email || '');
 
     return dados;
 };
@@ -72,6 +73,8 @@ export const registro = async (nome, username, email, senha, tipo = 'cliente') =
     await AsyncStorage.setItem('refreshToken', dados.refresh);
     await AsyncStorage.setItem('idUsuario', String(dados.id_usuario));
     await AsyncStorage.setItem('username', dados.username);
+    await AsyncStorage.setItem('nome', dados.nome || '');
+    await AsyncStorage.setItem('email', dados.email || '');
 
     return dados;
 };
@@ -79,16 +82,18 @@ export const registro = async (nome, username, email, senha, tipo = 'cliente') =
 // apaga todo do celular
 // Usado em: TelaPerfil
 export const logout = async () => {
-    await AsyncStorage.multiRemove(['token', 'refreshToken', 'idUsuario', 'username']);
+    await AsyncStorage.multiRemove(['token', 'refreshToken', 'idUsuario', 'username', 'nome', 'email']);
 };
 
 // Usado en: NavegadorPrincipal (al abrir la app)
 export const getUsuarioLogado = async () => {
     const idUsuario = await AsyncStorage.getItem('idUsuario');
     const username = await AsyncStorage.getItem('username');
+    const nome = await AsyncStorage.getItem('nome');
+    const email = await AsyncStorage.getItem('email');
     const token = await AsyncStorage.getItem('token');
     if (!token) return null;
-    return { idUsuario, username, token };
+    return { idUsuario, username, nome, email, token };
 };
 
 

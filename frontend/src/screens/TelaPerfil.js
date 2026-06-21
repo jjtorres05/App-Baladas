@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from "r
 import { Ionicons } from "@expo/vector-icons";
 import { CORES,TAMANHOS } from "../constants/tema";
 import { logout, getUsuarioLogado } from "../services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function TelaPerfil({navigation, aoSair}){
     const [usuario, setUsuario] = useState(null);
@@ -36,8 +37,8 @@ export default function TelaPerfil({navigation, aoSair}){
                 <View style={estilos.avatar}>
                     <Ionicons name="person" size={50} color={CORES.textoSecundario}/>
                 </View>
-                <Text style={estilos.nome}>{usuario?.username || 'Usuario'}</Text>
-                <Text style={estilos.email}>ID: {usuario?.idUsuario || '-'}</Text>
+                <Text style={estilos.nome}>{usuario?.nome || usuario?.username || 'Usuário'}</Text>
+                <Text style={estilos.email}>{usuario?.email || `@${usuario?.username}`}</Text>
             </View>
             <View style={estilos.menu}>
                 {[

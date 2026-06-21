@@ -17,9 +17,13 @@ export default function TelaFavoritos({ navigation }) {
 
     const carregarFavoritos = async () => {
         try {
-            const dados = await AsyncStorage.getItem('favoritosEstabelecimentos');
+            const idUsuario = await AsyncStorage.getItem('idUsuario');
+            const chave = `favoritosEstabelecimentos_${idUsuario}`;
+            const dados = await AsyncStorage.getItem(chave);
             if (dados) {
                 setFavoritos(JSON.parse(dados));
+            } else {
+                setFavoritos([]);
             }
         } catch (erro) {
             console.error('Erro ao carregar favoritos:', erro);
@@ -28,11 +32,13 @@ export default function TelaFavoritos({ navigation }) {
 
     const removerFavorito = async (idEstabelecimento) => {
         try {
+            const idUsuario = await AsyncStorage.getItem('idUsuario');
+            const chave = `favoritosEstabelecimentos_${idUsuario}`;
             const novaLista = favoritos.filter(
                 (f) => f.id_estabelecimento !== idEstabelecimento && f.id !== idEstabelecimento
             );
             setFavoritos(novaLista);
-            await AsyncStorage.setItem('favoritosEstabelecimentos', JSON.stringify(novaLista));
+            await AsyncStorage.setItem(chave, JSON.stringify(novaLista));
         } catch (erro) {
             console.error('Erro ao remover favorito:', erro);
         }

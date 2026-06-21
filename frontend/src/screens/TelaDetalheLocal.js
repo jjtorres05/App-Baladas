@@ -41,7 +41,9 @@ export default function TelaDetalheLocal({ route, navigation }) {
 
     const verificarFavorito = async () => {
         try {
-            const dados = await AsyncStorage.getItem('favoritosEstabelecimentos');
+            const idUsuario = await AsyncStorage.getItem('idUsuario');
+            const chave = `favoritosEstabelecimentos_${idUsuario}`;
+            const dados = await AsyncStorage.getItem(chave);
             if (dados) {
                 const favoritos = JSON.parse(dados);
                 const idLocal = local.id_estabelecimento || local.id;
@@ -57,24 +59,23 @@ export default function TelaDetalheLocal({ route, navigation }) {
 
     const alternarFavorito = async () => {
         try {
-            const dados = await AsyncStorage.getItem('favoritosEstabelecimentos');
+            const idUsuario = await AsyncStorage.getItem('idUsuario');
+            const chave = `favoritosEstabelecimentos_${idUsuario}`;
+            const dados = await AsyncStorage.getItem(chave);
             let favoritos = dados ? JSON.parse(dados) : [];
             const idLocal = local.id_estabelecimento || local.id;
 
             if (ehFavorito) {
-                // Remove dos favoritos
                 favoritos = favoritos.filter(
                     (f) => (f.id_estabelecimento || f.id) !== idLocal
                 );
                 setEhFavorito(false);
             } else {
-                // Adiciona aos favoritos
                 favoritos.push(local);
                 setEhFavorito(true);
             }
 
-            await AsyncStorage.setItem('favoritosEstabelecimentos', JSON.stringify(favoritos));
-            // TODO: integrar com API quando Eduardo criar endpoint de favoritar estabelecimento
+            await AsyncStorage.setItem(chave, JSON.stringify(favoritos));
         } catch (erro) {
             console.error('Erro ao alterar favorito:', erro);
         }

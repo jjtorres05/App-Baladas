@@ -74,7 +74,9 @@ class CadastroView(APIView):
             "access": str(refresh.access_token),
             "refresh": str(refresh),
             "id_usuario": usuario.id_usuario,
-            "username": usuario.username
+            "username": usuario.username,
+            "nome": usuario.nome,
+            "email": usuario.email,
         }, status=201)
 
 
@@ -103,7 +105,9 @@ class LoginView(APIView):
             "access": str(refresh.access_token),
             "refresh": str(refresh),
             "id_usuario": usuario.id_usuario,
-            "username": usuario.username
+            "username": usuario.username,
+            "nome": usuario.nome,
+            "email": usuario.email,
         }, status=200)
 
 
@@ -173,7 +177,11 @@ class CadastrarEstabelecimentoView(APIView):
 
     def get(self, request):
         id_proprietario = request.query_params.get('id_proprietario')
-        estabelecimentos = Estabelecimento.objects.filter(id_proprietario=id_proprietario)
+        try:
+            proprietario = Proprietario.objects.get(id_usuario=id_proprietario)
+        except Proprietario.DoesNotExist:
+            return Response([], status=200)
+        estabelecimentos = Estabelecimento.objects.filter(id_proprietario=proprietario)
         serializer = EstabelecimentoSerializer(estabelecimentos, many=True)
         return Response(serializer.data)
 
